@@ -7,7 +7,7 @@ import {
 } from "@material-ui/styles";
 import { CssBaseline } from "@material-ui/core";
 import Head from "next/head";
-import theme from "../theme";
+import theme from "../styles/theme";
 import "../styles/globals.css";
 import { wrapper } from "../redux/store";
 
