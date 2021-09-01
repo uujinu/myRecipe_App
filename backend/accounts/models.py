@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+import random
+from random import choice
+from string import ascii_letters
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -26,6 +29,12 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
+def generate_random_name():
+    s = ''.join([choice(ascii_letters).lower() for i in range(5)])
+    num = random.randrange(1000, 10000)
+    return f'{s}{num}'
+
+
 class User(AbstractUser):
 
     PLATFORM_CHOICES = (
@@ -40,6 +49,8 @@ class User(AbstractUser):
 
     email = models.EmailField('이메일', unique=True)
     username = models.CharField('이름', unique=True, max_length=20)
+    nickname = models.CharField(
+        '닉네임', max_length=20, unique=True, blank=True, default=generate_random_name)
     platform = models.CharField(
         '소셜플랫폼', max_length=10, choices=PLATFORM_CHOICES, blank=True, null=True)
     social_id = models.CharField('소셜아이디', max_length=50, blank=True, null=True)
