@@ -84,3 +84,27 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def following_count(self):
+        return self.following.count()
+
+    def follower_count(self):
+        return self.followers.count()
+
+
+class Following(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='following')
+    following_user = models.ForeignKey(
+        User, related_name='followers', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'following'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following_user'],  name="unique_followers")
+        ]
+
+    def __str__(self):
+        return f"{self.user.nickname}님이 {self.following_user.nickname}님을 팔로우합니다."
