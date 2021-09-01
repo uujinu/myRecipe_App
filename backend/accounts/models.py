@@ -1,3 +1,6 @@
+import os
+from uuid import uuid4
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
@@ -5,6 +8,8 @@ import random
 from random import choice
 from string import ascii_letters
 from django.utils.translation import ugettext_lazy as _
+from imagekit.models.fields import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 
 class CustomUserManager(BaseUserManager):
@@ -27,6 +32,16 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
+
+
+def url(instance, filename):
+    ymd_path = timezone.now().strftime('%Y/%m/%d')
+    uuid_name = uuid4().hex
+    extension = os.path.splitext(filename)[-1].lower()
+    return '/profile/image/'.join([
+        ymd_path,
+        uuid_name + extension,
+    ])
 
 
 def generate_random_name():
@@ -60,6 +75,11 @@ class User(AbstractUser):
     USERNAME_FIELD = 'username'
 
     is_verified = models.BooleanField('인증여부', default=False)
+
+    profile_image = models.ImageField(
+        '프로필 사진', default='accounts/profile_basic.png', upload_to=url)
+    profile_image_resize = ImageSpecField(source='profile_image', processors=[
+                                          ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
 
     def __str__(self):
         return self.username
