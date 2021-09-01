@@ -4,6 +4,7 @@ from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,3 +49,20 @@ class CustomLoginSerializer(LoginSerializer):
 
         attrs['user'] = user
         return attrs
+
+
+class EmailResendSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=100, min_length=3)
+
+    class Meta:
+        model = User
+        fields = ['email', ]
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        try:
+            User.objects.get(email=email)
+            pass
+        except:
+            raise ValidationError(detail='해당 이메일로 가입된 계정이 존재하지 않습니다.')
+        return super().validate(attrs)
