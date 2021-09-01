@@ -73,6 +73,7 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['profile_image', ]
 
     is_verified = models.BooleanField('인증여부', default=False)
 
