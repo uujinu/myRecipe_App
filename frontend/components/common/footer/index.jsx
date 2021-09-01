@@ -1,6 +1,4 @@
 import styled from "styled-components";
-import { IconButton } from "@material-ui/core";
-import VerticalAlignTopRoundedIcon from "@material-ui/icons/VerticalAlignTopRounded";
 
 const FooterWrapper = styled.div`
   display: flex;
@@ -36,11 +34,6 @@ export default function Footer() {
           <Title>MyRecipe</Title>
           Copyright 2021. MyRecipe All rights reserved.
         </TextArea>
-        <ScrollTopBtn>
-          <IconButton>
-            <VerticalAlignTopRoundedIcon />
-          </IconButton>
-        </ScrollTopBtn>
       </FooterWrapper>
     </>
   );
