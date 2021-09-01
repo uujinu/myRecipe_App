@@ -7,6 +7,7 @@
           "root": ["./"],
           "alias": {
             "@components": "./components",
+            "@slice": "./redux/modules",
             "@src": "./src"
         },
         "extensions": [".js", ".jsx", ".tsx"]
