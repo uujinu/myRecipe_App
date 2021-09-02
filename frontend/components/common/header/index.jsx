@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
 import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
-
+import ImageAvatar from "../avatar";
 import MenuIcon from "@material-ui/icons/Menu";
 import Link from "next/link";
 
@@ -40,7 +40,7 @@ const Title = styled(Typography)`
   font-size: 25px;
 `;
 
-const AuthElement = styled.div`
+const LoginBtn = styled.div`
   margin-left: auto;
   font-size: 17px;
   border-radius: 20px;
@@ -48,6 +48,10 @@ const AuthElement = styled.div`
   &:hover {
     background-color: white;
   }
+`;
+
+const AvatarBtn = styled.div`
+  margin-left: auto;
 `;
 
 const throttle = (cb, time) => {
@@ -91,8 +95,36 @@ const ScrollTracker = () => {
   return { scrollY, hide };
 };
 
+const Buttons = (props) => {
+  const { id, name, image } = props.user;
+  const LoginElement = () => {
+    return (
+      <LoginBtn>
+      <Link href="/accounts/login" passHref>
+        <a href="replace">JOIN</a>
+      </Link>
+    </LoginBtn>
+    );
+  }
+  const AvatarElement = () => {
+    return (
+      <AvatarBtn>
+        <ImageAvatar name={name} image={image} />
+      </AvatarBtn>
+    );
+  }
+
+  if (id === null) return <LoginElement />;
+  else return <AvatarElement />;
+}
+
 export default function Header() {
   const { scrollY, hide } = ScrollTracker();
+  const user = {
+    id: 1,
+    name: "test",
+    image: null
+  };
 
   return (
     <NavBar scroll={scrollY} hide={hide ? 1 : 0}>
@@ -101,11 +133,7 @@ export default function Header() {
           <MenuIcon />
         </IconButton>
         <Title>MyRecipe</Title>
-        <AuthElement>
-          <Link href="/accounts/login" passHref>
-            <a href="replace">JOIN</a>
-          </Link>
-        </AuthElement>
+        <Buttons user={user} />
       </ToolBar>
     </NavBar>
   );
