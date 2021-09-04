@@ -8,8 +8,6 @@ import random
 from random import choice
 from string import ascii_letters
 from django.utils.translation import ugettext_lazy as _
-from imagekit.models.fields import ImageSpecField
-from imagekit.processors import ResizeToFill
 
 
 class CustomUserManager(BaseUserManager):
@@ -79,8 +77,6 @@ class User(AbstractUser):
 
     profile_image = models.ImageField(
         '프로필 사진', default='accounts/profile_basic.png', upload_to=url)
-    profile_image_resize = ImageSpecField(source='profile_image', processors=[
-                                          ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
 
     def __str__(self):
         return self.username
