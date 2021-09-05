@@ -26,17 +26,18 @@ class CustomUserDetailSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'username', 'email')
+        fields = ('pk', 'username', 'email', 'nickname', 'profile_image')
 
 
 class CustomRegisterSerializer(RegisterSerializer):
-    profile_image = serializers.ImageField(required=False, use_url=True)
+
+    profile_image = serializers.ImageField(required=False)
 
     # Define transaction.atomic to rollback the save operation in case of error
     @transaction.atomic
     def save(self, request):
         user = super().save(request)
-        user.profile_image = self.data.get('profile_image')
+        user.profile_image = request.data.get('profile_image')
         user.save()
         return user
 
