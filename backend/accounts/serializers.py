@@ -5,6 +5,8 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 
 class CustomUserDetailSerializer(serializers.ModelSerializer):
@@ -83,3 +85,15 @@ class EmailResendSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError(detail='해당 이메일로 가입된 계정이 존재하지 않습니다.')
         return super().validate(attrs)
+
+
+class CookieTokenRefreshSerializer(TokenRefreshSerializer):
+    refresh = None
+
+    def validate(self, attrs):
+        attrs['refresh'] = self.context['request'].COOKIES.get('refresh_token')
+        if attrs['refresh']:
+            return super().validate(attrs)
+        else:
+            raise InvalidToken(
+                'No valid token found in cookie \'refresh_token\'')
