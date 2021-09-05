@@ -7,6 +7,22 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
 
+class CustomUserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_fields = []
+        if hasattr(User, 'USERNAME_FIELD'):
+            extra_fields.append(User.USERNAME_FIELD)
+        if hasattr(User, 'EMAIL_FIELD'):
+            extra_fields.append(User.EMAIL_FIELD)
+        if hasattr(User, 'nickname'):
+            extra_fields.append('nickname')
+        if hasattr(User, 'profile_image'):
+            extra_fields.append('profile_image')
+        model = User
+        fields = ('pk', *extra_fields)
+        read_only_fields = ('email',)
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
