@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from allauth.account.models import EmailAddress
 from dj_rest_auth.views import LoginView
 from django.contrib import messages
@@ -14,6 +15,26 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 class CustomLoginView(LoginView):
     serializer_class = CustomLoginSerializer
+
+    def get_response(self):
+        serializer_class = self.get_response_serializer()
+        data = {
+            'user': self.user,
+            'access_token': self.access_token,
+            'refresh_token': self.refresh_token,
+        }
+
+        serializer = serializer_class(
+            instance=data,
+            context=self.get_serializer_context(),
+        )
+
+        response = Response(serializer.data, status=status.HTTP_200_OK)
+        cookie_max_age = self.refresh_token.lifetime.total_seconds()
+        response.set_cookie(
+            'refresh_token', response.data['refresh_token'], max_age=cookie_max_age, httponly=True)
+
+        return response
 
 
 class ResendEmailView(generics.GenericAPIView):
@@ -53,3 +74,25 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
+
+
+class CookieTokenObtainPairView(TokenObtainPairView):
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get('refresh'):
+            cookie_max_age = 3600 * 24 * 1  # 1 day
+            response.set_cookie(
+                'refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
+            del response.data['refresh']
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    serializer_class = CookieTokenRefreshSerializer
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get('refresh'):
+            cookie_max_age = 3600 * 24 * 1  # 1 day
+            response.set_cookie(
+                'refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
+            del response.data['refresh']
+        return super().finalize_response(request, response, *args, **kwargs)
