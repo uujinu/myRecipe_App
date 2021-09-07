@@ -223,7 +223,7 @@ AWS_QUERYSTRING_AUTH = False
 #
 #
 ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'accounts.adapter.SocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.social.adapter.SocialAccountAdapter'
 #
 #
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
