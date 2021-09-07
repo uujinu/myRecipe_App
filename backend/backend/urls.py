@@ -13,10 +13,10 @@ urlpatterns = [
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
     path('token/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
-    path('accounts/account-confirm-email/',
-         VerifyEmailView.as_view(),
+    path('confirm-email/', VerifyEmailView.as_view(),
          name='account_email_verification_sent'),
     path('accounts/', include('allauth.urls')),
+    path('accounts/', include('accounts.social.urls')),
 
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
