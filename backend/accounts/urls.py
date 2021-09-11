@@ -1,9 +1,7 @@
 from django.urls import path
-from django.urls.conf import include
 from .views import *
 from allauth.account.views import ConfirmEmailView
 from dj_rest_auth.views import PasswordResetConfirmView
-from dj_rest_auth.views import LogoutView
 
 
 urlpatterns = [

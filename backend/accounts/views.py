@@ -1,3 +1,5 @@
+from dj_rest_auth.jwt_auth import unset_jwt_cookies
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from allauth.account.models import EmailAddress
 from dj_rest_auth.views import LoginView
@@ -11,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from allauth.account.adapter import get_adapter
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from django.contrib.auth import logout as django_logout
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomLoginView(LoginView):
@@ -42,13 +46,13 @@ class ResendEmailView(generics.GenericAPIView):
     permission_classes = [AllowAny, ]
 
     def _action_send(self, request, *args, **kwargs):
-        email = request.POST["email"]
+        email = request.POST['email']
         email_address = EmailAddress.objects.get(email=email)
         get_adapter(request).add_message(
             request,
             messages.INFO,
-            "account/messages/" "email_confirmation_sent.txt",
-            {"email": email},
+            'account/messages/' 'email_confirmation_sent.txt',
+            {'email': email},
         )
         email_address.send_confirmation(request)
 
@@ -57,7 +61,39 @@ class ResendEmailView(generics.GenericAPIView):
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         self._action_send(request)
-        return Response({"success": "이메일이 전송되었습니다."}, status=status.HTTP_200_OK)
+        return Response({'success': '이메일이 전송되었습니다.'}, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = [AllowAny, ]
+
+    def get_token(self, request):
+        if request.COOKIES != {}:
+            token = request.COOKIES['refresh_token']
+            return token
+        return ""
+
+    def logout(self, request, token):
+        django_logout(request)
+        response = Response(
+            {'success': 'Successfully logged out.'},
+            status=status.HTTP_200_OK,
+        )
+        try:
+            t = RefreshToken(token)
+            t.blacklist()
+            unset_jwt_cookies(response)
+            return response
+        except:
+            response.data = {'error': 'Logout Failed.'}
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return response
+
+    def get(self, request):
+        res = self.get_token(request)
+        if res != "":
+            return self.logout(request, res)
+        return Response({'error': 'Logout Failed.'})
 
 
 class LogoutAllView(APIView):

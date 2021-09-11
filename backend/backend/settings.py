@@ -79,9 +79,11 @@ REST_FRAMEWORK = {
     )
 }
 
-# simplejwt
 REST_USE_JWT = True
+JWT_AUTH_REFRESH_COOKIE = 'refresh_token'
+JWT_AUTH_SECURE = False
 
+# simplejwt
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -129,11 +131,10 @@ MIDDLEWARE = [
 ]
 
 INTERNAL_IPS = ('127.0.0.1')
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
 ]
 
 AUTHENTICATION_BACKENDS = (
