@@ -1,5 +1,4 @@
 import React from "react";
-import NextApp from "next/app";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import {
   StylesProvider,
@@ -10,19 +9,30 @@ import Head from "next/head";
 import theme from "../styles/theme";
 import "../styles/globals.css";
 import { wrapper } from "../redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { useStore } from "react-redux";
+import { useEffect } from "react";
 
-class _App extends NextApp {
-  componentDidMount() {
+function MyApp(props) {
+  const { Component, pageProps } = props;
+  const store = useStore((state) => state);
+
+  useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode) {
       jssStyles.parentNode.removeChild(jssStyles);
     }
-  }
+  }, []);
 
-  render() {
-    const { Component, pageProps } = this.props;
-
-    return (
+  return (
+    <>
+      <Head>
+        <title>MyRecipe</title>
+        <meta
+          name="viewport"
+          content="initial-scale=1.0, width=device-width"
+        />
+      </Head>
       <StylesProvider injectFirst>
         <StyledThemeProvider theme={theme}>
           <MuiThemeProvider theme={theme}>
@@ -34,12 +44,14 @@ class _App extends NextApp {
               />
             </Head>
             <CssBaseline />
-            <Component {...pageProps} />
+            <PersistGate persistor={store.__persistor} loading={<div>loading...</div>}>
+              <Component {...pageProps} />
+            </PersistGate>
           </MuiThemeProvider>
         </StyledThemeProvider>
       </StylesProvider>
-    );
-  }
+    </>
+  )
 }
 
-export default wrapper.withRedux(_App);
+export default wrapper.withRedux(MyApp);
