@@ -1,5 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { logout } from "../login";
+import { userLogout } from "../user";
 
 const name = "login";
 axios.defaults.baseURL = "http://localhost:8000";
@@ -28,20 +30,6 @@ export const signupUser = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const res = await axios.post(signupUrl, data);
-      return res.data;
-    } catch (e) {
-        const res = await e.response.data;
-        return thunkAPI.rejectWithValue(res)
-    }
-  }
-)
-
-// 로그아웃
-export const logoutUser = createAsyncThunk(
-  `${name}/logoutUser`,
-  async (data, thunkAPI) => {
-    try {
-      const res = await axios.post(logoutUrl, data);
       return res.data;
     } catch (e) {
         const res = await e.response.data;
