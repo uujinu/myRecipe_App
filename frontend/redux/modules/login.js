@@ -12,7 +12,15 @@ const initialState = {
 const loginSlice = createSlice({
   name: "login",
   initialState,
-  reducers: {},
+  reducers: {
+    refreshJWT: (state, { payload }) => {
+      state.accessJWT = payload;
+    },
+    logout: (state) => {
+      state.accessJWT = "";
+      state.isAuth = false;
+    },
+  },
   extraReducers: {
     [loginUser.pending.type]: (state) => {
       state.isLoading = true;
@@ -33,5 +41,6 @@ const loginSlice = createSlice({
 });
 
 const { reducer, actions } = loginSlice;
+export const { refreshJWT, logout } = actions;
 export const selectLogin = (state) => state.login;
 export default reducer;
