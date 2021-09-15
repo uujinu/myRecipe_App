@@ -1,5 +1,4 @@
 from dj_rest_auth.jwt_auth import unset_jwt_cookies
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from allauth.account.models import EmailAddress
 from dj_rest_auth.views import LoginView
@@ -15,6 +14,9 @@ from allauth.account.adapter import get_adapter
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from django.contrib.auth import logout as django_logout
 from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.utils import datetime_from_epoch
 
 
 class CustomLoginView(LoginView):
@@ -113,6 +115,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
+    permission_classes = [AllowAny, ]
+
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
             cookie_max_age = 3600 * 24 * 1  # 1 day
@@ -124,9 +128,24 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
 class CookieTokenRefreshView(TokenRefreshView):
     serializer_class = CookieTokenRefreshSerializer
+    permission_classes = [AllowAny, ]
 
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
+            token = RefreshToken(response.data.get('refresh'))
+            jti = token[api_settings.JTI_CLAIM]
+            exp = token['exp']
+
+            user_id = request.data['user_id']
+            user = User.objects.get(pk=user_id)
+
+            OutstandingToken.objects.create(
+                user=user,
+                jti=jti,
+                token=str(token),
+                created_at=token.current_time,
+                expires_at=datetime_from_epoch(exp),
+            )
             cookie_max_age = 3600 * 24 * 1  # 1 day
             response.set_cookie(
                 'refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
