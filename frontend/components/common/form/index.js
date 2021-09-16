@@ -1,4 +1,10 @@
 import { useState } from "react";
+import styled from "styled-components";
+
+const FormWrapper = styled.form`
+  display: flex;
+  flex-direction: column;
+`
 
 export function useForm(initialValues, validateOnChange = false, validate) {
   const [values, setValues] = useState(initialValues);
@@ -33,8 +39,8 @@ export function useForm(initialValues, validateOnChange = false, validate) {
 export default function Form(props) {
   const { children, ...other } = props;
   return (
-    <form autoComplete="off" {...other}>
+    <FormWrapper autoComplete="off" {...other}>
       {children}
-    </form>
+    </FormWrapper>
   )
 };
