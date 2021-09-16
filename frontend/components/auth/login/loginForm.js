@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { getUserInfo } from "../../../redux/modules/user";
 import Form, { useForm } from "../../common/form";
-import { TextField } from "@material-ui/core";
+import TextFieldWrapper from "../../common/textfield";
 import ButtonWrapper from "../../common/button";
 import { loginUser } from "../../../redux/modules/thunk/auth";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -47,7 +47,7 @@ export default function LoginForm() {
         dispatch(getUserInfo(res));
         router.replace("/");
       })
-      .catch((rejectedValueOrSerializedError) => {
+      .catch((e) => {
         alert("로그인에 실패하였습니다.");
       })
     resetForm();
@@ -64,9 +64,9 @@ export default function LoginForm() {
   return (
     <>
       <Form onSubmit={handleOnSubmit}>
-        <TextField {...(errors.email && {error: true, helperText: errors.email})} required color="secondary" name="email" value={values.email} id="email" label="이메일" onChange={handleInputChange}/>
-        <TextField {...(errors.password && {error: true, helperText: errors.password})} required color="secondary" name="password" value={values.password} id="password" label="비밀번호" type="password" inputProps={{maxLength: 16}} onChange={handleInputChange}/>
-        <ButtonWrapper type="submit" disable={btn} text={"로그인"} />
+        <TextFieldWrapper {...(errors.email && {error: true, helperText: errors.email})} required color="secondary" name="email" value={values.email} id="email" label="이메일" onChange={handleInputChange}/>
+        <TextFieldWrapper {...(errors.password && {error: true, helperText: errors.password})} required color="secondary" name="password" value={values.password} id="password" label="비밀번호" type="password" inputProps={{maxLength: 16}} onChange={handleInputChange}/>
+        <ButtonWrapper type="submit" disable={btn} text={"로그인"} style={{"marginTop": "5px"}}/>
       </Form>
     </>
   )
