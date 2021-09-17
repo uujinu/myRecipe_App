@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
-import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
+import { AppBar, Toolbar, IconButton, Typography, Button } from "@material-ui/core";
 import ImageAvatar from "../avatar";
 import MenuIcon from "@material-ui/icons/Menu";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../redux/modules/user";
 
 const NavBar = styled(AppBar)`
   align-items: center;
@@ -50,8 +52,13 @@ const LoginBtn = styled.div`
   }
 `;
 
-const AvatarBtn = styled.div`
+const AvatarBtnTwo = styled(Button)`
+  padding: 0;
+  border-radius: 50%;
   margin-left: auto;
+  &.MuiButton-root {
+    min-width: 0;
+  } 
 `;
 
 const throttle = (cb, time) => {
@@ -96,7 +103,7 @@ const ScrollTracker = () => {
 };
 
 const Buttons = (props) => {
-  const { id, name, image } = props.user;
+  const { pk, nickname, profile_image } = props.user;
   const LoginElement = () => {
     return (
       <LoginBtn>
@@ -108,23 +115,19 @@ const Buttons = (props) => {
   }
   const AvatarElement = () => {
     return (
-      <AvatarBtn>
-        <ImageAvatar name={name} image={image} />
-      </AvatarBtn>
+      <AvatarBtnTwo>
+        <ImageAvatar name={nickname} image={profile_image} />
+      </AvatarBtnTwo>
     );
   }
 
-  if (id === null) return <LoginElement />;
+  if (pk === null) return <LoginElement />;
   else return <AvatarElement />;
 }
 
 export default function Header() {
   const { scrollY, hide } = ScrollTracker();
-  const user = {
-    id: 1,
-    name: "test",
-    image: null
-  };
+  const { user } = useSelector(selectUser);
 
   return (
     <NavBar scroll={scrollY} hide={hide ? 1 : 0}>
