@@ -1,17 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { logout } from "../login";
-import { userLogout } from "../user";
 
-const name = "login";
 axios.defaults.baseURL = "http://localhost:8000";
 const loginUrl = "accounts/login/";
 const signupUrl = "accounts/signup/";
-const logoutUrl = "accounts/logout/";
 
 // 로그인
 export const loginUser = createAsyncThunk(
-  `${name}/loginUSer`,
+  "login/loginUSer",
   async (data, thunkAPI) => {
     try {
       const res = await axios.post(loginUrl, data, {withCredentials: true});
@@ -26,7 +22,7 @@ export const loginUser = createAsyncThunk(
 
 // 회원가입
 export const signupUser = createAsyncThunk(
-  `${name}/signupUser`,
+  "signup/signupUser",
   async (data, thunkAPI) => {
     try {
       const res = await axios.post(signupUrl, data);
