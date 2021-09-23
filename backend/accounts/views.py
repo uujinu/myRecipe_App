@@ -1,4 +1,5 @@
 from dj_rest_auth.jwt_auth import unset_jwt_cookies
+from django.http.response import HttpResponseRedirect
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from allauth.account.models import EmailAddress
 from dj_rest_auth.views import LoginView
@@ -17,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.utils import datetime_from_epoch
+from dj_rest_auth.views import PasswordResetConfirmView
 
 
 class CustomLoginView(LoginView):
@@ -151,3 +153,9 @@ class CookieTokenRefreshView(TokenRefreshView):
                 'refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
             del response.data['refresh']
         return super().finalize_response(request, response, *args, **kwargs)
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    def get(self, request, uidb64, token):
+        from django.http import HttpResponseRedirect
+        return HttpResponseRedirect(f'http://localhost:3000/accounts/password-reset?uidb64={uidb64}&token={token}')
