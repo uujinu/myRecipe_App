@@ -1,22 +1,26 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import { HYDRATE } from "next-redux-wrapper";
 import userReducer from "./user";
 import loginReducer from "./login";
+import signupReducer from "./signup";
+import storage from "redux-persist/lib/storage";
+import storageSession from 'redux-persist/lib/storage/session';
+import { persistReducer } from "redux-persist";
 
-const combinedReducers = combineReducers({
-  user: userReducer,
-  login: loginReducer,
-});
-
-const rootReducer = (state, action) => {
-  if (action.type === HYDRATE) {
-    const nextState = {
-      ...state,
-      ...action.payload,
-    };
-    return nextState;
-  }
-  return combinedReducers(state, action);
+export const persistConfig = {
+  key: "root",
+  storage: storage,
+  blacklist: ["login"],
 };
 
-export default rootReducer;
+const loginPersistConfig = {
+  key: "login",
+  storage: storageSession,
+}
+
+const combinedReducers = combineReducers({
+  login: persistReducer(loginPersistConfig, loginReducer),
+  user: userReducer,
+  signup: signupReducer,
+});
+
+export default combinedReducers;

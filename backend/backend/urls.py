@@ -3,9 +3,7 @@ from django.conf import settings
 from dj_rest_auth.registration.views import VerifyEmailView
 from django.conf.urls.static import static
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView)
+from accounts.views import CookieTokenRefreshView, CookieTokenObtainPairView
 
 
 urlpatterns = [
@@ -13,12 +11,12 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('accounts/account-confirm-email/',
-         VerifyEmailView.as_view(),
+    path('token/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('confirm-email/', VerifyEmailView.as_view(),
          name='account_email_verification_sent'),
     path('accounts/', include('allauth.urls')),
+    path('accounts/', include('accounts.social.urls')),
 
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]

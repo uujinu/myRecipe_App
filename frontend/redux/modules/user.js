@@ -4,9 +4,12 @@ const initialState = {
   user: {
     email: "",
     nickname: "",
-    id: null,
+    pk: null,
     profile_image: null
-  }
+  },
+  isLoading: false,
+  error: "",
+  status: ""
 };
 
 const userSlice = createSlice({
@@ -16,13 +19,13 @@ const userSlice = createSlice({
     userProfile: (state) => {
       return state.user;
     },
-    getUserInfo: (state) => {
+    getUserInfo: (state, { payload }) => {
       state.user = payload.user;
     },
     userLogout: (state) => {
       state.user = initialState.user;
     },
-  },
+  }
 });
 
 const { reducer, actions } = userSlice;

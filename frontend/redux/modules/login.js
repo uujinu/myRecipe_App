@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { loginUser } from "./thunk/auth";
+
 
 const initialState = {
   accessJWT: "",
@@ -11,23 +13,34 @@ const loginSlice = createSlice({
   name: "login",
   initialState,
   reducers: {
-    loginPending: (state) => {
+    refreshJWT: (state, { payload }) => {
+      state.accessJWT = payload;
+    },
+    logout: (state) => {
+      state.accessJWT = "";
+      state.isAuth = false;
+    },
+  },
+  extraReducers: {
+    [loginUser.pending.type]: (state) => {
       state.isLoading = true;
     },
-    loginSuccess: (state, { payload }) => {
-      state.accessJWT = payload.access_token;
+    [loginUser.fulfilled.type]: (state, { payload }) => {
       state.isLoading = false;
       state.isAuth = true;
+      state.accessJWT = payload.access_token;
       state.error = "";
     },
-    loginFail: (state, { payload }) => {
+    [loginUser.rejected.type]: (state, action) => {
       state.isLoading = false;
-      state.error = payload;
-    }
+      state.isAuth = false;
+      state.accessJWT = "";
+      state.error = action.error.message;
+    },
   }
 });
 
 const { reducer, actions } = loginSlice;
-export const { loginPending, loginSuccess, loginFail } = actions;
+export const { refreshJWT, logout } = actions;
 export const selectLogin = (state) => state.login;
 export default reducer;
