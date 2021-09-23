@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
 
+    'storages',
+
     'accounts',
     'posts',
 
@@ -63,6 +65,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 REST_AUTH_SERIALIZERS = {
     'LOGIN_SERIALIZER': 'accounts.serializers.CustomLoginSerializer',
+    'USER_DETAILS_SERIALIZER': 'accounts.serializers.CustomUserDetailSerializer',
 }
 
 # JWT Support
@@ -76,9 +79,11 @@ REST_FRAMEWORK = {
     )
 }
 
-# simplejwt
 REST_USE_JWT = True
+JWT_AUTH_REFRESH_COOKIE = 'refresh_token'
+JWT_AUTH_SECURE = False
 
+# simplejwt
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -126,9 +131,10 @@ MIDDLEWARE = [
 ]
 
 INTERNAL_IPS = ('127.0.0.1')
-
+CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
+    'http://127.0.0.1:3000',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -220,7 +226,7 @@ AWS_QUERYSTRING_AUTH = False
 #
 #
 ACCOUNT_ADAPTER = 'accounts.adapter.AccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'accounts.adapter.SocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.social.adapter.SocialAccountAdapter'
 #
 #
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
@@ -241,8 +247,8 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 
 LOGIN_URL = 'https://localhost:8000/accounts/login/'
 
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/accounts/login/'
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/accounts/login/'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'http://localhost:3000/accounts/login'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'http://localhost:3000/accounts/login'
 
 # EMAIL BACKEND
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
