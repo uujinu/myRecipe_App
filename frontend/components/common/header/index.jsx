@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
-import { AppBar, Toolbar, IconButton, Typography, Button } from "@material-ui/core";
-import ImageAvatar from "../avatar";
+import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/modules/user";
+import AvatarElement from "../avatar/avatarElement";
 
 const NavBar = styled(AppBar)`
   align-items: center;
@@ -52,13 +52,8 @@ const LoginBtn = styled.div`
   }
 `;
 
-const AvatarBtnTwo = styled(Button)`
-  padding: 0;
-  border-radius: 50%;
+const AvatarWrapper = styled.div`
   margin-left: auto;
-  &.MuiButton-root {
-    min-width: 0;
-  } 
 `;
 
 const throttle = (cb, time) => {
@@ -113,16 +108,16 @@ const Buttons = (props) => {
     </LoginBtn>
     );
   }
-  const AvatarElement = () => {
+  const AvatarMenu = () => {
     return (
-      <AvatarBtnTwo>
-        <ImageAvatar name={nickname} image={profile_image} />
-      </AvatarBtnTwo>
+      <AvatarWrapper>
+        <AvatarElement pk={pk} name={nickname} profile_image={profile_image} />
+      </AvatarWrapper>
     );
   }
 
   if (pk === null) return <LoginElement />;
-  else return <AvatarElement />;
+  else return <AvatarMenu />;
 }
 
 export default function Header() {
