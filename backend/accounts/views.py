@@ -115,6 +115,14 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = {
+            'user': serializer.data,
+        }
+        return Response(data)
+
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny, ]
@@ -157,5 +165,4 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     def get(self, request, uidb64, token):
-        from django.http import HttpResponseRedirect
         return HttpResponseRedirect(f'http://localhost:3000/accounts/password-reset?uidb64={uidb64}&token={token}')
