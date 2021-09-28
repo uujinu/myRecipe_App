@@ -1,13 +1,9 @@
-
 import os
 import requests
-from json.decoder import JSONDecodeError
 from rest_framework.views import APIView
 from django.shortcuts import redirect
+from django.http.response import HttpResponseRedirect
 from rest_framework import generics
-from rest_framework import status
-from rest_framework.response import Response
-from django.http.response import JsonResponse
 from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.permissions import AllowAny
 from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
@@ -15,7 +11,6 @@ from allauth.socialaccount.providers.naver.views import NaverOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.serializers import SocialAccountSerializer
 from accounts.models import User
-from .serializers import *
 
 
 class NaverSignUpView(APIView):
@@ -34,11 +29,17 @@ class NaverSignInCallBackView(generics.GenericAPIView):
     serializer_class = SocialAccountSerializer
     adapter_class = NaverOAuth2Adapter
 
+    def error_res(self, err=None):
+        res = HttpResponseRedirect(
+            'http://localhost:3000/accounts/social/error')
+        if err:
+            res.set_cookie('error', err)
+        return res
+
     def get(self, request, *args, **kwargs):
         error = request.GET.get('error')
         if error is not None:
-            error_description = request.GET.get('error_description')
-            return Response(error_description, status=status.HTTP_400_BAD_REQUEST)
+            return self.error_res()
         code = request.GET.get('code')
         state = request.GET.get('state')
 
@@ -52,9 +53,7 @@ class NaverSignInCallBackView(generics.GenericAPIView):
 
         error = token_response_json.get('error')
         if error is not None:
-            error_description = token_response_json.get('error_description')
-            msg = f'{error_description} [{error}]'
-            return Response(msg, status=status.HTTP_400_BAD_REQUEST)
+            return self.error_res()
 
         # 발급 요청 성공한 경우 네이버 회원정보 요청
         access_token = token_response_json.get('access_token')
@@ -66,15 +65,14 @@ class NaverSignInCallBackView(generics.GenericAPIView):
         naver_response_json = naver_response.json()
 
         if (naver_response_json.get('resultcode') != '00'):
-            return JsonResponse(naver_response_json.get('message'), status=status.HTTP_400_BAD_REQUEST)
+            return self.error_res()
 
         email = naver_response_json.get('response').get('email')
 
         try:
             user = User.objects.get(email=email)
             if user.platform != 'naver':
-                platform = "일반 계정" if user.platform is None else user.platform
-                return Response({'error': email + '은 ' + platform + '(으)로 가입된 계정입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                return self.error_res('platformerror')
         except:
             pass
 
@@ -83,10 +81,22 @@ class NaverSignInCallBackView(generics.GenericAPIView):
             url, {'access_token': access_token, 'code': code})
         data_status = data.status_code
         if data_status != 200:
-            return Response({'error': '로그인에 실패하였습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+            return self.error_res()
+
         accept_json = data.json()
-        accept_json.pop('user', None)
-        return Response(accept_json, status=status.HTTP_200_OK)
+
+        access_token = accept_json.get('access_token')
+        refresh_token = accept_json.get('refresh_token')
+        pk = accept_json.get('user').get('pk')
+
+        client_finish = f'http://localhost:3000/accounts/social/finish/{pk}'
+        res = HttpResponseRedirect(client_finish)
+        res.set_cookie('refresh_token', refresh_token,
+                       max_age=3600 * 24 * 1, httponly=True)
+        res.set_cookie('access_token', access_token,
+                       max_age=300, httponly=True)
+
+        return res
 
 
 class NaverLogin(SocialLoginView):
@@ -112,6 +122,13 @@ class KakaoSignInCallBackView(generics.GenericAPIView):
     serializer_class = SocialAccountSerializer
     adapter_class = KakaoOAuth2Adapter
 
+    def error_res(self, err=None):
+        res = HttpResponseRedirect(
+            'http://localhost:3000/accounts/social/error')
+        if err:
+            res.set_cookie('error', err)
+        return res
+
     def get(self, request):
         rest_api_key = os.environ.get('REST_API_KEY')
         redirect_uri = os.environ.get('REDIRECT_URI')
@@ -128,7 +145,7 @@ class KakaoSignInCallBackView(generics.GenericAPIView):
         token_response_json = token_response.json()
         error = token_response_json.get('error')
         if error is not None:
-            raise JSONDecodeError(error)
+            return self.error_res(error)
 
         access_token = token_response_json.get('access_token')
 
@@ -143,26 +160,34 @@ class KakaoSignInCallBackView(generics.GenericAPIView):
         url = 'http://localhost:8000/accounts/kakao/login/'
 
         if email is None:
-            return Response({'error': '가입 시 이메일은 필수입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+            return self.error_res("emailnoneerror")
 
         try:
             user = User.objects.get(email=email)
             if user.platform != 'kakao':
-                platform = "일반 계정" if user.platform is None else user.platform
-                return Response({'error': email + '은 ' + platform + '(으)로 가입된 계정입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+                return self.error_res("platformerror")
         except:
             pass
 
         data = requests.post(url, {'access_token': access_token})
         data_status = data.status_code
         if data_status != 200:
-            return JsonResponse({'error': '로그인에 실패하였습니다.'}, status=data_status)
+            return self.error_res()
 
         accept_json = data.json()
-        accept_json.pop('user', None)
-        access_token = accept_json.get('access_token')
 
-        return JsonResponse({'success': '로그인에 성공하였습니다.', 'result': accept_json})
+        access_token = accept_json.get('access_token')
+        refresh_token = accept_json.get('refresh_token')
+        pk = accept_json.get('user').get('pk')
+        client_finish = f'http://localhost:3000/accounts/social/finish/{pk}'
+
+        res = HttpResponseRedirect(client_finish)
+        res.set_cookie('refresh_token', refresh_token,
+                       max_age=3600 * 24 * 1, httponly=True)
+        res.set_cookie('access_token', access_token,
+                       max_age=300, httponly=True)
+
+        return res
 
 
 class kakaoLogin(SocialLoginView):
