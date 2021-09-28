@@ -3,14 +3,14 @@ import { createWrapper } from "next-redux-wrapper";
 import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension"
-import combinedReducers, { persistConfig } from "../modules";
+import rootReducer, { persistConfig } from "../modules";
 import { persistStore, persistReducer } from "redux-persist";
 
 
 const enhancer = composeWithDevTools(applyMiddleware(thunkMiddleware));
 // persistConfig
 const makeStore = () => {
-  const persistedReducer = persistReducer(persistConfig, combinedReducers);
+  const persistedReducer = persistReducer(persistConfig, rootReducer);
   const store = createStore(
       persistedReducer,
       enhancer
