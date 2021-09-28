@@ -31,26 +31,22 @@ export default function AuthPage(props) {
             </Link>
           </S.Visible>
           <S.SocialImage auth={auth}>
-            <Link href="/accounts/kakao" passHref>
-              <a href="replace">
-                <Image
-                  src="/login_sns_kakao.png"
-                  width={50}
-                  height={50}
-                  quality={100}
-                />
-              </a>
-            </Link>
-            <Link href="/accounts/naver" passHref>
-              <a href="replace">
-                <Image
-                  src="/login_sns_naver.png"
-                  width={50}
-                  height={50}
-                  quality={100}
-                />
-              </a>
-            </Link>
+            <a href="/accounts/kakao">
+              <Image
+                src="/login_sns_kakao.png"
+                width={50}
+                height={50}
+                quality={100}
+              />
+            </a>
+            <a href="/accounts/naver">
+              <Image
+                src="/login_sns_naver.png"
+                width={50}
+                height={50}
+                quality={100}
+              />
+            </a>
           </S.SocialImage>
         </S.BottomWrapper>
       </S.AuthWrapper>
