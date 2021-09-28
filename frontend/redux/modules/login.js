@@ -20,6 +20,10 @@ const loginSlice = createSlice({
       state.accessJWT = "";
       state.isAuth = false;
     },
+    socialLogin: (state, { payload }) => {
+      state.accessJWT = payload;
+      state.isAuth = true;
+    },
   },
   extraReducers: {
     [loginUser.pending.type]: (state) => {
@@ -41,6 +45,6 @@ const loginSlice = createSlice({
 });
 
 const { reducer, actions } = loginSlice;
-export const { refreshJWT, logout } = actions;
+export const { refreshJWT, logout, socialLogin } = actions;
 export const selectLogin = (state) => state.login;
 export default reducer;

@@ -1,4 +1,5 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.account.utils import user_username
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -11,12 +12,13 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         user.is_verified = True
         user.platform = sociallogin.account.provider
         user.social_id = sociallogin.account.uid
+        user.save()
+        return user
+
+    def populate_user(self, request, sociallogin, data):
 
         if sociallogin.account.provider == 'naver':
             username = sociallogin.account.extra_data.get('name')
-            email = sociallogin.account.extra_data.get('email')
-            user.username = username
-            user.email = email
-
-        user.save()
-        return user
+            user = sociallogin.user
+            user_username(user, username or "")
+        return super().populate_user(request, sociallogin, data)
