@@ -34,6 +34,10 @@ const InfoBox = styled.div`
   justify-content: space-between;
 `;
 
+const Clickable = styled.div`
+  cursor: pointer;
+`;
+
 const MessageBox = styled.div`
   font-family: auto;
   margin: 35px 0 20px;
@@ -126,7 +130,7 @@ export default function LoginForm() {
         <TextFieldWrapper required color="secondary" name="email" value={values.email} id="email" label="이메일" onChange={handleInputChange}/>
         <TextFieldWrapper required color="secondary" name="password" value={values.password} id="password" label="비밀번호" type="password" inputProps={{maxLength: 16}} onChange={handleInputChange}/>
         <ButtonWrapper type="submit" text={"로그인"} style={{"marginTop": "5px", "width": "100%"}} loading={isLoading? "indeterminate" : null}/>
-        <InfoBox><div onClick={()=>(setResend(!resend),setChoice("verify"))}>인증이메일 재전송</div><div onClick={()=>(setResend(!resend),setChoice("password"))}>비밀번호 변경</div></InfoBox>
+        <InfoBox><Clickable onClick={()=>(setResend(!resend),setChoice("verify"))}>인증이메일 재전송</Clickable><Clickable onClick={()=>(setResend(!resend),setChoice("password"))}>비밀번호 변경</Clickable></InfoBox>
         </ResendForm>
       </Form>
     </>
