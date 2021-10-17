@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../../common/header";
 import Footer from "../../common/footer";
 
+
 const PageContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -11,12 +12,12 @@ const PageContainer = styled.div`
   align-items: center;
 `;
 
-export default function CommonLayout({ children }) {
+export default function CommonLayout({ fix, children }) {
   return (
     <>
       <PageContainer>
-        <Header />
-        {children}
+        <Header fix={fix} />
+          {children}
         <Footer />
       </PageContainer>
     </>

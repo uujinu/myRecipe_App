@@ -1,11 +1,12 @@
+import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
-import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import Link from "next/link";
 import { useSelector } from "react-redux";
-import { selectUser } from "../../../redux/modules/user";
+import MenuIcon from "@material-ui/icons/Menu";
+import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
+import { selectUser } from "@slice/user";
 import AvatarElement from "../avatar/avatarElement";
+
 
 const NavBar = styled(AppBar)`
   align-items: center;
@@ -13,11 +14,12 @@ const NavBar = styled(AppBar)`
   -webkit-transition-property: background-color, box-shadow, transform;
   -webkit-transition-timing-function: cubic-bezier(0.24, 1.03, 1, 1);
   box-shadow: 0 2px 6px 0 rgb(0 0 0 / 15%);
-  background-color: #fad5c4ab;
+  background-color: ${(props) => props.fix ? "#fad5c4": "#fad5c4ab"};
 
   ${(props) =>
     props.scroll > 200 &&
     props.hide === 1 &&
+    props.fix === 0 &&
     css`
       background-color: transparent;
       transform: translateY(-100%);
@@ -26,6 +28,7 @@ const NavBar = styled(AppBar)`
 
   ${(props) =>
     props.scroll <= 200 &&
+    props.fix === 0 &&
     css`
       background-color: transparent;
       box-shadow: none;
@@ -120,12 +123,12 @@ const Buttons = (props) => {
   else return <AvatarMenu />;
 }
 
-export default function Header() {
+export default function Header({ fix }) {
   const { scrollY, hide } = ScrollTracker();
   const { user } = useSelector(selectUser);
 
   return (
-    <NavBar scroll={scrollY} hide={hide ? 1 : 0}>
+    <NavBar scroll={scrollY} hide={hide ? 1 : 0} fix={fix}>
       <ToolBar>
         <IconButton edge="start">
           <MenuIcon />
