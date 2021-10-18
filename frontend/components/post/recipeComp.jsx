@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Select, FormControl, IconButton, InputLabel as MuiInputLabel } from "@material-ui/core";
 import CommonLayout from "../layout/common";
-import AddIcon from '@material-ui/icons/Add';
-import CreateIcon from '@material-ui/icons/Create';
-import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import AddIcon from "@material-ui/icons/Add";
+import CreateIcon from "@material-ui/icons/Create";
+import FileUploadComps from "./fileUploadComp";
+import ButtonWrapper from "../common/button";
 
 
 const PostContainer = styled.div`
@@ -12,10 +13,10 @@ const PostContainer = styled.div`
     padding: 0;
     margin-top: 56px;
   }
+  max-width: 1980px;
   width: 100%;
   margin-top: 100px;
   padding: 0 20px;
-  min-height: 100vh;
 `;
 
 const RegiTitle = styled.div`
@@ -148,6 +149,7 @@ const ListWrapper = styled.li`
 const DeleteBtnWrapper = styled.img`
   vertical-align: middle;
   cursor: pointer;
+  margin: 0 5px;
 `;
 
 const AddBtnWrapper = styled.div`
@@ -206,7 +208,6 @@ const CookStepNum = styled.p`
   padding : 6px 0 0 0;
 `;
 
-
 const CookStepList = styled.ul`
   padding: 0;
   list-style: none;
@@ -225,7 +226,6 @@ const CookStepText = styled.textarea`
   ${(props) => props.theme.breakpoints.down("sm")} {
     width: 100%;
   }
-
   font: initial;
   width: 500px;
   resize: none;
@@ -240,16 +240,6 @@ const CookStepText = styled.textarea`
   }
 `;
 
-const CookStepImg = styled.input`
-  position: absolute;
-  width: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0;
-`;
-
 const BoxWrapper = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
     flex-direction: row;
@@ -259,59 +249,37 @@ const BoxWrapper = styled.div`
   align-items: center;
 `;
 
-const UploadImgContainer = styled.div`
+const ImagesContainer = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
-    width: 100%
-  }
-
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  position: relative;
-  border-radius: 6px;
-  border: 4px dotted #e9e9e9;
-  align-items: center;
-  width: 160px;
-  height: 160px;
-  margin: 0 15px 0 0;
-  color: #b7b2af;
-
-  &:hover {
-    border: 4px dotted #fad5c4;
+    width: 100%;
   }
 `;
 
-const UploadBtn = styled.button`
-  z-index: 1;
-  background-color: transparent;
-  cursor: pointer;
-  color: inherit;
-  border: none;
-  width: 100%;
-  height: 100%;
+const BtnContainer = styled.div`
 `;
+
 
 function InfoForm({id, label, name, value, select, func}) {
   return (
     <FormControl required variant="outlined" style={{margin: "10px 25px 0 0"}}>
       <MuiInputLabel id={id}>{label}</MuiInputLabel>
-        <SelectInput
-          labelId={id}
-          native
-          name={name}
-          value={value}
-          onChange={func}
-          label={label}
-        >
-          {select.map((s, idx) => {
-            return <option key={idx} value={s}>{s}</option>
-          })}
-        </SelectInput>
+      <SelectInput
+        labelId={id}
+        native
+        name={name}
+        value={value}
+        onChange={func}
+        label={label}
+      >
+        {select.map((s, idx) => {
+          return <option key={idx} value={s}>{s}</option>
+        })}
+      </SelectInput>
     </FormControl>
   )
 }
 
-function ListForm(state, setState, parent, prefix, initialState) {
+function ListForm(state, setState, initialState, parent, prefix) {
 
   const DelBtn = (e) => {
     const _id = e.target.id;
@@ -321,14 +289,16 @@ function ListForm(state, setState, parent, prefix, initialState) {
   };
 
   const AddBtn = () => {
-    let nextId;
-    if (parent.hasChildNodes()) {
-      nextId = parseInt((parent.lastChild.id).split("-")[1]) + 1;
-    } else nextId = 1;
+    if (parent) {
+      let nextId;
+      if (parent.hasChildNodes()) {
+        nextId = parseInt((parent.lastChild.id).split("-")[1]) + 1;
+      } else nextId = 1;
 
-    state[prefix + nextId] = initialState[prefix + "1"];
-    setState({...state});
-    console.log("add: ", state);
+      state[prefix + nextId] = initialState[prefix + "1"];
+      setState({...state});
+      console.log("add: ", state);
+    }   
   };
 
   const handleItem = (e) => {
@@ -337,12 +307,58 @@ function ListForm(state, setState, parent, prefix, initialState) {
     const idx = name.split("_")[1];
     state[id][idx] = value;
     setState({...state});
+    
+    console.log(idx, ': ', state);
   };
+
+  const addFiles = (e) => {
+    const { name } = e.target;
+    const { files: newFiles } = e.target;
+
+    if (name === "images") {
+      if (newFiles.length) {
+        for (let file of newFiles) {
+          if (Object.keys(state.images).length >= 5) {
+            alert("최대 5장까지 업로드할 수 있습니다.");
+            break;
+          }
+          state.images[file.name] = file;
+        }
+        setState({...state});
+      }
+      
+    } else {
+      const id = name.split("_")[0];
+      const idx = name.split("_")[1];
+      if (newFiles.length) {
+        for (let file of newFiles) {
+          state[id][idx][file.name] = file;
+        }
+        setState({...state});
+      }
+    }
+    console.log("state: ", state);
+  }
+
+  const removeFiles = (name, fileName) => {
+    if (name === "images") {
+      delete state.images[fileName];
+      setState({...state});
+    } else {
+      const id = name.split("_")[0];
+      const idx = name.split("_")[1];
+      delete state[id][idx][fileName];
+      setState({...state});
+    }
+    console.log("state: ", state);
+  }
 
   return {
     DelBtn,
     AddBtn,
-    handleItem
+    handleItem,
+    addFiles,
+    removeFiles
   };
 }
 
@@ -364,7 +380,7 @@ function IngList({handleMainChange}) {
 
   const [ing, setIng] = useState(initialState);
   const parent = document.getElementById("ul-1");
-  const {DelBtn, AddBtn, handleItem} = ListForm(ing, setIng, parent, "li-", initialState);
+  const {DelBtn, AddBtn, handleItem} = ListForm(ing, setIng, initialState, parent, "li-");
 
   useEffect(() => {
     handleMainChange("ingredient", ing);
@@ -414,17 +430,17 @@ function StepList({handleMainChange}) {
   const initialState = {
     "sli-1": {
       description: "",
-      stepImage: ""
+      stepImage: {}
     },
     "sli-2": {
       description: "",
-      stepImage: ""
+      stepImage: {}
     },
   };
 
   const [step, setStep] = useState(initialState);
   const parent = document.getElementById("step-list");
-  const {DelBtn, AddBtn, handleItem} = ListForm(step, setStep, parent, "sli-", initialState);
+  const {addFiles, removeFiles, DelBtn, AddBtn, handleItem} = ListForm(step, setStep, initialState, parent, "sli-");
   
   useEffect(() => {
     handleMainChange("cookStep", step);
@@ -447,18 +463,16 @@ function StepList({handleMainChange}) {
                   onChange={handleItem}
                 />
                 <BoxWrapper>
-                  <UploadImgContainer>
-                    <UploadBtn>
-                      <AddPhotoAlternateIcon fontSize="large"/>
-                    </UploadBtn>
-                    <CookStepImg
-                      id={keys}
-                      type="file"
-                      name={keys + "_stepImage"}
-                      value={step[keys].stepImage}
-                      onChange={handleItem}
-                    />
-                  </UploadImgContainer>
+                  <FileUploadComps
+                    text={0}
+                    wide={1}
+                    removeFunc={removeFiles}
+                    id={keys}
+                    name={keys + "_stepImage"}
+                    value={step[keys].stepImage}
+                    multiple={false}
+                    handle={addFiles}
+                  />
                   <DeleteBtnWrapper id={keys} src="/btn_del.gif" onClick={DelBtn}/>
                 </BoxWrapper>
               </CookStepLiWrapper>
@@ -474,6 +488,26 @@ function StepList({handleMainChange}) {
     </>
   )
 }
+
+function Images({state, setState}) {
+  const { addFiles, removeFiles } = ListForm(state, setState)
+
+  return (
+    <FileUploadComps
+      text={1}
+      wide={1}
+      removeFunc={removeFiles}
+      id="images"
+      name="images"
+      value={state.images}
+      multiple={true}
+      handle={addFiles}
+      width="600"
+      height="80"
+    />
+  )
+}
+
 
 export default function Recipe() {
   const [input, setInput] = useState({
@@ -512,63 +546,89 @@ export default function Recipe() {
       <CommonLayout fix={1}>
         <PostContainer>
           <RegiTitle>레시피 등록</RegiTitle>
-            <ContentBox>
-              <ContLine>
-                <InputLabel fill={1}>레시피 제목</InputLabel>
-                <Input
-                  name="title"
-                  value={input.title}
-                  height="35"
-                  placeholder="예) 부침개 만들기"
-                  maxLength= "50"
-                  onChange={handleChange}
-                />
-              </ContLine>
-              <ContLine>
-                <InputLabel fill={1}>레시피 소개</InputLabel>
-                <TextInput
-                  name="description"
-                  value={input.description}
-                  height="70"
-                  placeholder="예) 부추와 해산물을 활용한 맛있는 부침개 레시피입니다."
-                  rows="3"
-                  maxLength="200"
-                  onChange={handleChange}
-                />
-              </ContLine>
-              <ContLine>
-                <InputLabel fill={1}>레시피 정보</InputLabel>
-                <RecipeInfo>         
-                  <InfoForm id="cook-portion" label="인원" name="cookPortion" value={input.cookPortion} select={COOK_PORTION_SELECT} func={handleChange}/>
-                  <InfoForm id="cook-time" label="시간" name="cookTime" value={input.cookTime} select={COOK_TIME_SELECT} func={handleChange}/>
-                  <InfoForm id="cook-degree" label="난이도" name="cookDegree" value={input.cookDegree} select={COOK_DEGREE_SELECT} func={handleChange}/>
-                </RecipeInfo>
-              </ContLine>     
-            </ContentBox>
-            <ContentBox>
-              <ContLine style={{marginBottom: "55px"}}>
-              <InputLabel fill={1} style={{marginBottom: "auto", marginTop: "6px"}}>재료</InputLabel>
-                <IngList handleMainChange={handleMainChange}/> 
-              </ContLine>
-            </ContentBox>
-            <ContentBox>
-              <ContLine>
-              <StepWrapper>
-                <InputLabel fill={1}>레시피 순서</InputLabel>
-                <StepInfo>
-                  <CreateIcon color="action" fontSize="small" style={{marginRight: "9px"}} />
-                  당신의 레시피를 소개해주세요!<br />
-                  조리 사진을 첨부하여 더욱 근사한 레시피를 완성해보세요.
-                </StepInfo>
-                <CookStepBox>
-                  <CookStepItem>
-                    <StepList handleMainChange={handleMainChange}/>
-                  </CookStepItem>
-                </CookStepBox>
-              </StepWrapper>
-              </ContLine>
-            </ContentBox>
-          </PostContainer>
+          <ContentBox>
+            <ContLine>
+              <InputLabel fill={1}>레시피 제목</InputLabel>
+              <Input
+                name="title"
+                value={input.title}
+                height="35"
+                placeholder="예) 부침개 만들기"
+                maxLength= "50"
+                onChange={handleChange}
+              />
+            </ContLine>
+            <ContLine>
+              <InputLabel fill={1}>레시피 소개</InputLabel>
+              <TextInput
+                name="description"
+                value={input.description}
+                height="70"
+                placeholder="예) 부추와 해산물을 활용한 맛있는 부침개 레시피입니다."
+                rows="3"
+                maxLength="200"
+                onChange={handleChange}
+              />
+            </ContLine>
+            <ContLine>
+              <InputLabel fill={1}>레시피 정보</InputLabel>
+              <RecipeInfo>         
+                <InfoForm id="cook-portion" label="인원" name="cookPortion" value={input.cookPortion} select={COOK_PORTION_SELECT} func={handleChange}/>
+                <InfoForm id="cook-time" label="시간" name="cookTime" value={input.cookTime} select={COOK_TIME_SELECT} func={handleChange}/>
+                <InfoForm id="cook-degree" label="난이도" name="cookDegree" value={input.cookDegree} select={COOK_DEGREE_SELECT} func={handleChange}/>
+              </RecipeInfo>
+            </ContLine>     
+          </ContentBox>
+          <ContentBox>
+            <ContLine style={{marginBottom: "55px"}}>
+            <InputLabel fill={1} style={{marginBottom: "auto", marginTop: "6px"}}>재료</InputLabel>
+              <IngList handleMainChange={handleMainChange}/> 
+            </ContLine>
+          </ContentBox>
+          <ContentBox>
+            <ContLine>
+            <StepWrapper>
+              <InputLabel fill={1}>레시피 순서</InputLabel>
+              <StepInfo>
+                <CreateIcon color="action" fontSize="small" style={{marginRight: "9px"}} />
+                당신의 레시피를 소개해주세요!<br />
+                조리 사진을 첨부하여 더욱 근사한 레시피를 완성해보세요.
+              </StepInfo>
+              <CookStepBox>
+                <CookStepItem>
+                  <StepList handleMainChange={handleMainChange}/>
+                </CookStepItem>
+              </CookStepBox>
+            </StepWrapper>
+            </ContLine>
+          </ContentBox>
+          <ContentBox>
+            <ContLine>
+              <InputLabel style={{marginBottom: "auto"}}>완성 사진</InputLabel>
+              <ImagesContainer>
+                <Images state={input} setState={setInput} />
+              </ImagesContainer>
+            </ContLine>
+          </ContentBox>
+          <ContentBox style={{borderBottom: "1px solid #e9e9e9"}}>
+            <ContLine>
+              <InputLabel>레시피 팁</InputLabel>
+              <TextInput
+                name="content"
+                value={input.content}
+                height="100"
+                placeholder="예) 반죽에 튀김가루를 섞으면 더욱 바삭해져요."
+                rows="3"
+                maxLength="200"
+                onChange={handleChange}
+              />
+            </ContLine>
+          </ContentBox>
+          <BtnContainer>
+            <ButtonWrapper size="large" text="저장" />
+            <ButtonWrapper size="large" text="취소" />
+          </BtnContainer>            
+        </PostContainer>
       </CommonLayout>
     </>
   )
