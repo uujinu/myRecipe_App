@@ -48,16 +48,16 @@ class Post(models.Model):
     title = models.CharField('제목', blank=False, max_length=126)
 
     cook_portion = models.CharField(
-        '분량', max_length=10, choices=PORTION_CHOICES, null=True, blank=False)
+        '분량', max_length=10, choices=PORTION_CHOICES)
     cook_time = models.CharField(
-        '조리시간', max_length=10, choices=TIME_CHOICES, null=True, blank=False)
+        '조리시간', max_length=10, choices=TIME_CHOICES)
     cook_degree = models.CharField(
-        '난이도', max_length=10, choices=DEGREE_CHOICES, null=True, blank=False)
+        '난이도', max_length=10, choices=DEGREE_CHOICES)
     description = models.CharField(
-        '간단 설명', max_length=1000, blank=True, null=True)
-    content = models.TextField('내용')
+        '간단 설명', max_length=1000)
+    content = models.TextField('내용', blank=True, null=True)
     likes = models.ManyToManyField(
-        'accounts.User', related_name='like_posts', symmetrical=False)
+        'accounts.User', related_name='like_posts')
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
@@ -66,7 +66,7 @@ class Post(models.Model):
 
     @property
     def datetime(self):
-        return self.created_at.strftime('%m/%d/%Y')
+        return self.created_at.strftime('%Y.%m.%d')
 
     def __str__(self):
         return self.title
@@ -92,7 +92,7 @@ class Post(models.Model):
 
 class Ingredient(models.Model):
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name='ingredients')
+        Post, on_delete=models.CASCADE, related_name='ingredients', null=True)
     name = models.CharField('재료명', max_length=100)
     quantity = models.CharField('양', max_length=50)
 
@@ -102,7 +102,7 @@ class Ingredient(models.Model):
 
 class CookStep(models.Model):
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name='cooksteps')
+        Post, on_delete=models.CASCADE, related_name='cooksteps', null=True)
     step_id = models.PositiveIntegerField('순서')
     description = models.TextField('레시피설명')
     step_image = models.ImageField(
@@ -114,8 +114,11 @@ class CookStep(models.Model):
 
 class Images(models.Model):
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name='images')
+        Post, on_delete=models.CASCADE, related_name='images', null=True)
     recipe_image = models.ImageField(upload_to=url, blank=True, null=True)
+
+    class Meta:
+        ordering = ['pk']
 
     def __str__(self):
         return f'{self.post.title}_image_{self.pk}'
