@@ -12,7 +12,7 @@ export default function axiosWrapper(method, url, data=null, callback, errors=()
 
   axios.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       const status = error.response ? error.response.status : null
       const originalRequest = error.config;
       if (status === 401 && !originalRequest.__retry) { // unauthorized error
@@ -41,17 +41,22 @@ export default function axiosWrapper(method, url, data=null, callback, errors=()
         })
       } else {
           alert("로그인 연장에 실패했습니다. 다시 로그인해주세요.")
-          router.push("/");
+          //router.push("/");
           return Promise.reject(error);
       }
   });
 
-  const promise =  axios({
-    method : `${method}`,
-    url : `${url}`,
-    data : data
-  });
-
-  const dataPromise = promise.then((response) => response.data);
-  return dataPromise;
+  axios({
+    method: `${method}`,
+    url: `${url}`,
+    data: data
+  })
+  .then((res) => {
+    console.log("axios res: ", res);
+    callback(res);
+  })
+  .catch((e) => {
+    console.error("axios err: ", e);
+    errors(e);
+  })
 }
