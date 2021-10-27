@@ -130,18 +130,17 @@ export default function FileUploadComps({text, wide, removeFunc, name, value, ha
           multiple={multiple}
           onChange={handle}
         />
-        {!multiple &&
-          Object.keys(value).map((fileName, idx)=> (
-            <FilePreviewContainer key={idx}>
+        {!multiple && value &&
+          <FilePreviewContainer>
             <ImagePreview 
-              src={URL.createObjectURL(value[fileName])}
+              src={URL.createObjectURL(value)}
             />
-            <RemoveBtn onClick={()=>removeFunc(name, fileName)}>
+            <RemoveBtn onClick={()=>removeFunc(name)}>
               <IconButton size="small">
                 <ClearIcon />
               </IconButton>
             </RemoveBtn>
-          </FilePreviewContainer>))
+          </FilePreviewContainer>
         }
         </FileUploadContainer>
         {multiple &&
