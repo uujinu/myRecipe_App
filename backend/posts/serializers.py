@@ -80,3 +80,19 @@ class PostWriteSerializer(serializers.ModelSerializer):
                     '[cooksteps] Fill in the blank')
 
         return attrs
+
+
+class PostListSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['author'] = UserSerializer(instance.author).data
+        repr['created_at'] = instance.datetime
+        return repr
+
+    class Meta:
+        model = Post
+        fields = ['id', 'author', 'title', 'total_likes',
+                  'total_comments', 'score_average', 'created_at']
+        read_only_fields = ['id', 'title', 'total_likes',
+                            'total_comments', 'score_average']
