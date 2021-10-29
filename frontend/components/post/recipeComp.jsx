@@ -552,7 +552,7 @@ function Images({state, setState}) {
 }
 
 
-export default function Recipe({ingState, stepState, inputState, method}) {
+export default function Recipe({ingState, stepState, inputState, method, postId}) {
   const [btn, setBtn] = useState(true);
   const [isLoading, setLoading] = useState(false);
   const router = useRouter();
@@ -662,16 +662,17 @@ export default function Recipe({ingState, stepState, inputState, method}) {
       formData.append("images", value);
     })
     
-    axiosWrapper("post", "/posts/newpost/", formData, (res) =>
-      {
-        if (res.status === 201) {
-          //router.push("/");
-          console.log("post created.");
-        }
-      }, (err) => {
-        alert("오류가 발생했습니다." + err)
-        console.log("post create err: ", err)
-      });
+    const url = method === "post" ? "/posts/post/" : `/posts/post/${postId}/`;
+    axiosWrapper(method, url, formData, (res) =>
+    {
+      if (res.status === 201) {
+        //router.push("/");
+        console.log("post created.");
+      }
+    }, (err) => {
+      alert("오류가 발생했습니다." + err)
+      console.log("post create err: ", err)
+    });
     
     setLoading(false);
     return false;
