@@ -10,13 +10,14 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 `;
 
 export default function CommonLayout({ fix, children }) {
   return (
     <>
       <PageContainer>
-        <Header fix={fix} />
+        <Header fix={fix}/>
           {children}
         <Footer />
       </PageContainer>
