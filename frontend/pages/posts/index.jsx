@@ -1,12 +1,17 @@
 // 전체레시피나옴
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
-import axios from "axios";
-import CommonLayout from "@components/layout/common";
-import ImageAvatar from "@components/common/avatar";
 import Image from "next/image";
 import Link from "next/link";
-import TopBtn from "../../components/common/scrollTopBtn"
+import axios from "axios";
+import axiosWrapper from "../../src/helpers/axiosWrapper";
+import CommonLayout from "@components/layout/common";
+import ImageAvatar from "@components/common/avatar";
+import TopBtn from "@components/common/scrollTopBtn"
+import TurnedInNotOutlinedIcon from '@material-ui/icons/TurnedInNotOutlined';
+import TurnedInRoundedIcon from '@material-ui/icons/TurnedInRounded';
+import { selectUser } from "../../redux/modules/user";
 
 
 const ListContainer = styled.div`
@@ -145,6 +150,8 @@ const ImgItem = styled.div`
 `;
 
 const RecipeDetails = styled.div`
+  display: flex;
+  justify-content: space-between;
   padding: 15px;
   font-size: 20px;
   position: absolute;
@@ -155,12 +162,37 @@ const RecipeDetails = styled.div`
   background: #ffe9e98c;
 `;
 
+const RecipeMark = styled.div`
+  cursor: pointer;
+`;
+
 
 export default function RecipeList({ list }) {
+
+  const { user } = useSelector(selectUser);
+  const [marks, setMarks] = useState();
+
+  useEffect(() => {
+    // 로그인한 유저에 대해서만 북마크 목록 불러옴
+    if (user.pk) {
+      axios.get(`http://localhost:8000/posts/bookmarks/${user.pk}/`)
+      .then((res) => {
+        console.log("res: ", res.data.posts);
+        setMarks(res.data.posts);
+      })
+      .catch((err) => {
+        console.log("err: ", err);
+      })
+    }
+  });
 
   useEffect(() => {
     console.log("clientside: ", list);
   }, []);
+
+  const handleMark = (e) => {
+
+  }
 
   return (
     <CommonLayout fix={0}>
@@ -195,7 +227,12 @@ export default function RecipeList({ list }) {
                       </ImgItem>
                     </a>
                     </Link>
-                    <RecipeDetails className="info">김치 볶음밥</RecipeDetails>
+                    <RecipeDetails className="info">
+                      김치 볶음밥
+                      <RecipeMark onClick={handleMark}>
+                        <TurnedInNotOutlinedIcon />
+                      </RecipeMark>
+                    </RecipeDetails>
                   </ImgWrapper>
                 </TDRecipeBox>
             </TDRecipeWrapper>
