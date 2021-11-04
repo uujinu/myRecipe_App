@@ -283,29 +283,23 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
 
 export default function RecipeList({ list }) {
   const { user } = useSelector(selectUser);
-  const [marks, setMarks] = useState();
+  const [marks, setMarks] = useState([]);
 
   useEffect(() => {
     // 로그인한 유저에 대해서만 북마크 목록 불러옴
     if (user.pk) {
-      axios.get(`http://localhost:8000/posts/bookmarks/${user.pk}/`)
-      .then((res) => {
-        console.log("res: ", res.data.posts);
-        setMarks(res.data.posts);
-      })
-      .catch((err) => {
+      axiosWrapper("get", "http://localhost:8000/accounts/bookmark/", undefined, (res) => {
+        setMarks(res.data.bookmarks);
+      }, (err) => {
         console.log("err: ", err);
       })
     }
-  });
-
-  useEffect(() => {
-    console.log("clientside: ", list);
   }, []);
 
-  const handleMark = (e) => {
-
-  }
+  useEffect(() => {
+    // 전체 글 목록
+    console.log("clientside: ", list);
+  }, []);
 
   return (
     <CommonLayout fix={0}>
@@ -322,31 +316,18 @@ export default function RecipeList({ list }) {
             <TDRecipeWrapper>
               <SCTitle>오늘의 레시피</SCTitle>
               <TDRecipeBox>
-                  <ImgWrapper>
-                    <Link href="/posts" passHref>
-                      <a>
-                        <ImgItem>
-                          <Image src="/platter.jpg" alt="img" layout="fill" objectFit="cover"/>
-                        </ImgItem>
-                      </a>
-                    </Link>
-                    <RecipeDetails className="info">바베큐 플래터</RecipeDetails>
-                  </ImgWrapper>
-                  <ImgWrapper>
-                  <Link href="/posts" passHref>
-                    <a>
-                      <ImgItem>
-                        <Image src="/kimchi-rice.jpg" alt="img" layout="fill" objectFit="cover"/>
-                      </ImgItem>
-                    </a>
-                    </Link>
-                    <RecipeDetails className="info">
-                      김치 볶음밥
-                      <RecipeMark onClick={handleMark}>
-                        <TurnedInNotOutlinedIcon />
-                      </RecipeMark>
-                    </RecipeDetails>
-                  </ImgWrapper>
+                <RecipeCard
+                  pk={user.pk}
+                  recipeInfo={list[0]}
+                  marks={marks}
+                  src="/platter.jpg"
+                />
+                <RecipeCard
+                  pk={user.pk}
+                  recipeInfo={list[1]}
+                  marks={marks}
+                  src="/kimchi-rice.jpg"
+                />
               </TDRecipeBox>
             </TDRecipeWrapper>
           </TopSection>
