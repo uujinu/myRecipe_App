@@ -1,7 +1,10 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import *
 
+router = DefaultRouter()
+router.register('post', PostView)
+
 urlpatterns = [
-    path('newpost/',
-         PostWriteView.as_view({'post': 'create'}), name='post_create'),
+    path('', include(router.urls)),
 ]
