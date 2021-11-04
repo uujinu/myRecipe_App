@@ -133,10 +133,9 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='comments')
     content = models.CharField(max_length=128, null=True, blank=True)
-    rating = models.PositiveIntegerField(null=True, validators=(
+    rating = models.FloatField(blank=True, null=True, validators=(
         MaxValueValidator(5),
-        MinValueValidator(0))
-    )
+        MinValueValidator(0)))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
