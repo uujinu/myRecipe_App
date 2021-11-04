@@ -1,6 +1,10 @@
 import styled from "styled-components";
 
 const FooterWrapper = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    padding: 0 20px;
+    height: 100px;
+  }
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,23 +12,32 @@ const FooterWrapper = styled.div`
   height: 180px;
   width: 100%;
   background-color: #fad5c4ab;
+  justify-content: space-around;
 `;
 
 const TextArea = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    margin: 30px 0 5px 0;
+  }
   font-size: 10px;
+  display: flex;
+  max-width: 1980px;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const Title = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    font-size: 18px;
+    margin: 0;
+  }
   font-family: Rose;
   font-size: 30px;
   font-weight: bold;
   margin-bottom: 10px;
 `;
 
-const ScrollTopBtn = styled.div`
-  height: 51px;
-  width: 51px;
-`;
 
 export default function Footer() {
   return (

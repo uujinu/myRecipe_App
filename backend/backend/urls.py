@@ -16,6 +16,7 @@ urlpatterns = [
     path('confirm-email/', VerifyEmailView.as_view(),
          name='account_email_verification_sent'),
     path('accounts/', include('allauth.urls')),
+    path('posts/', include('posts.urls')),
 
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]

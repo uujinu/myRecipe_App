@@ -19,6 +19,9 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.utils import datetime_from_epoch
 from dj_rest_auth.views import PasswordResetConfirmView
+from rest_framework.decorators import api_view, permission_classes
+from posts.models import Post
+from django.shortcuts import get_object_or_404
 
 
 class CustomLoginView(LoginView):
@@ -166,3 +169,18 @@ class CookieTokenRefreshView(TokenRefreshView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     def get(self, request, uidb64, token):
         return HttpResponseRedirect(f'http://localhost:3000/accounts/password-reset?uidb64={uidb64}&token={token}')
+
+
+@api_view(['get', 'post', 'delete'])
+@permission_classes((IsAuthenticated,))
+def bookmark(request, post_id=None):
+    if request.method == 'GET':  # 사용자 북마크 리스트
+        data = BookMarkSerializer(request.user).data
+        return Response(data, status=status.HTTP_200_OK)
+    else:  # 북마크 생성/삭제
+        post = get_object_or_404(Post, pk=post_id)
+        if post.bookmarks.filter(id=request.user.id).exists():
+            post.bookmarks.remove(request.user)
+        else:
+            post.bookmarks.add(request.user)
+        return Response('success', status=status.HTTP_200_OK)

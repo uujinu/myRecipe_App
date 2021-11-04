@@ -97,3 +97,10 @@ class CookieTokenRefreshSerializer(TokenRefreshSerializer):
         else:
             raise InvalidToken(
                 'No valid token found in cookie \'refresh_token\'')
+
+
+class BookMarkSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['bookmarks']

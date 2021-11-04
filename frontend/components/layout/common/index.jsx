@@ -3,20 +3,22 @@ import styled from "styled-components";
 import Header from "../../common/header";
 import Footer from "../../common/footer";
 
+
 const PageContainer = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 `;
 
-export default function CommonLayout({ children }) {
+export default function CommonLayout({ fix, children }) {
   return (
     <>
       <PageContainer>
-        <Header />
-        {children}
+        <Header fix={fix}/>
+          {children}
         <Footer />
       </PageContainer>
     </>
