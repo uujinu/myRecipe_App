@@ -1,23 +1,24 @@
-// 전체레시피나옴
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { selectUser } from "@slice/user";
 import styled from "styled-components";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import axiosWrapper from "../../src/helpers/axiosWrapper";
+import RatingStar from "@components/common/rating";
 import CommonLayout from "@components/layout/common";
-import ImageAvatar from "@components/common/avatar";
 import TopBtn from "@components/common/scrollTopBtn"
-import TurnedInNotOutlinedIcon from '@material-ui/icons/TurnedInNotOutlined';
-import TurnedInRoundedIcon from '@material-ui/icons/TurnedInRounded';
-import { selectUser } from "../../redux/modules/user";
+import InfoBox, { SnackBar } from "@components/common/snackbar/index";
+import TurnedInNotOutlinedIcon from "@material-ui/icons/TurnedInNotOutlined";
+import TurnedInRoundedIcon from "@material-ui/icons/TurnedInRounded";
 
 
 const ListContainer = styled.div`
   max-width: 1980px;
   min-height: 100vh;
   width: 100%;
+  background: linear-gradient(to bottom,#FFF 12%,rgb(255 236 212 / 27%) 15.74%,rgb(250 225 213) 100%);
 `;
 
 const ListWrapper = styled.div`
@@ -95,6 +96,7 @@ const TDRecipeBox = styled.div`
   display: flex;
   margin: 20px 0;
   align-items: center;
+  justify-content: space-between;
 `;
 
 const ImgWrapper = styled.div`
@@ -106,7 +108,6 @@ const ImgWrapper = styled.div`
   width: 100%;
   height: 300px;
   border-radius: 15px;
-  margin: 0 5px;
 
   transition-property: box-shadow;
   transition-timing-function: cubic-bezier(0.24, 1.03, 1, 1);
@@ -149,26 +150,138 @@ const ImgItem = styled.div`
   position: relative;
 `;
 
-const RecipeDetails = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-  font-size: 20px;
-  position: absolute;
-  bottom: 0;
-  color: black;
-  height: 120px;
-  width: 100%;
-  background: #ffe9e98c;
-`;
-
 const RecipeMark = styled.div`
   cursor: pointer;
 `;
 
+const RecipeTitle = styled.a`
+  font-family: GmarketSansMedium;
+  font-size: 20px;
+  height: fit-content;
+  &:hover {
+    color: #f44336;
+  }
+`;
+
+const RecipeDetail = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    height: fit-content;
+  }
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  font-size: 20px;
+  color: black;
+  height: 120px;
+  width: 100%;
+  background-color: white;
+  border-radius: 15px;
+
+  & > div {
+    display: flex;
+    justify-content: space-between;
+  }
+`;
+
+const RCard = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    width: 100%;
+    margin: 12px 0 10px 0;
+  }
+  width: 48%;
+`;
+
+const RatingBox = styled.div`
+  margin-left: auto;
+  align-items: end;
+`;
+
+function RecipeCard({ recipeInfo, pk, marks, src }) {
+  const [mark, setMark] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [info, setInfo] = useState(recipeInfo);
+
+  const { open, handleOpen, handleClose } = SnackBar();
+
+  useEffect(() => {
+    if (pk) {
+      // 해당 포스트의 북마크 여부 확인
+      const res = marks.find(pk => pk === info.id);
+      if (res) setMark(true);
+      else setMark(false);
+    }
+  }, [marks])
+
+  const handleMark = (e) => {
+    if (pk) {
+      const method = mark? "delete" : "post";
+      setMsg(mark? "북마크가 취소되었습니다." : "북마크되었습니다.");
+      setMark(!mark);
+
+      axiosWrapper(method, `/accounts/bookmark/${info.id}/`, undefined, (res) => {
+        handleOpen();
+      }, (err) => {
+          alert("오류가 발생했습니다.");
+        }
+      );
+    }
+    else {
+      alert("로그인이 필요합니다.");
+    }
+  };
+
+  return (
+    <>
+      <RCard>
+        <ImgWrapper>
+          <Link href={`/posts/${info.id}`} passHref>
+            <a>
+              <ImgItem>
+                <Image src={src} alt="img" layout="fill" objectFit="cover"/>
+              </ImgItem>
+            </a>
+          </Link>
+        </ImgWrapper>
+        <RecipeDetail className="info">
+          <div>
+            <Link href={`/posts/${info.id}`} passHref>
+              <RecipeTitle>
+                {info.title}
+              </RecipeTitle>
+            </Link>
+            <RecipeMark onClick={handleMark}>
+              {mark &&
+                <TurnedInRoundedIcon />
+              }
+              {!mark &&
+                <TurnedInNotOutlinedIcon />
+              }
+            </RecipeMark> 
+          </div>
+          <RatingBox>
+            <RatingStar
+              value={info.score_average}
+              precision={0.1}
+              readOnly={true}
+            />
+            <div style={{fontSize: "15px"}}>
+              ({info.score_average? info.score_average : 0})
+            </div>
+          </RatingBox>
+        </RecipeDetail>
+      </RCard>
+      <InfoBox
+        open={open}
+        onClose={handleClose}
+        message={msg}
+        id={info.id}
+      />
+    </>
+  )
+}
 
 export default function RecipeList({ list }) {
-
   const { user } = useSelector(selectUser);
   const [marks, setMarks] = useState();
 
@@ -208,7 +321,7 @@ export default function RecipeList({ list }) {
           <TopSection>
             <TDRecipeWrapper>
               <SCTitle>오늘의 레시피</SCTitle>
-                <TDRecipeBox>
+              <TDRecipeBox>
                   <ImgWrapper>
                     <Link href="/posts" passHref>
                       <a>
@@ -234,7 +347,7 @@ export default function RecipeList({ list }) {
                       </RecipeMark>
                     </RecipeDetails>
                   </ImgWrapper>
-                </TDRecipeBox>
+              </TDRecipeBox>
             </TDRecipeWrapper>
           </TopSection>
         </ListWrapper>
