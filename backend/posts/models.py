@@ -57,7 +57,9 @@ class Post(models.Model):
         '간단 설명', max_length=1000)
     content = models.TextField('내용', blank=True, null=True)
     likes = models.ManyToManyField(
-        'accounts.User', related_name='like_posts')
+        'accounts.User', related_name='like_posts', default=None, blank=True)
+    bookmarks = models.ManyToManyField(
+        'accounts.User', related_name='bookmarks', default=None, blank=True)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
@@ -73,9 +75,6 @@ class Post(models.Model):
 
     def total_likes(self):
         return self.likes.count()
-
-    def total_bookmarks(self):
-        return self.bookmarks.count()
 
     def score_average(self):  # 평균 평점
         all_scores = self.comments.values()
@@ -146,17 +145,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.author.nickname} | {self.content}'
-
-
-# 북마크
-class BookMark(models.Model):
-    owner = models.ForeignKey(
-        'accounts.User', verbose_name='owner', on_delete=models.CASCADE, related_name='bookmarks')
-    posts = models.ManyToManyField(Post, blank=True, related_name='bookmarks')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['created_at']
-
-    def __str__(self):
-        return f'[BookMark] {self.posts.count()}'
