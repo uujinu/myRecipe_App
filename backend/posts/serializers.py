@@ -20,13 +20,6 @@ class CommentSerializer(serializers.ModelSerializer):
         return repr
 
 
-class BookMarkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BookMark
-        fields = ['owner', 'posts']
-        lookup_field = 'owner'
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -99,7 +92,6 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'author', 'title', 'total_likes', 'total_bookmarks',
-                  'total_comments', 'score_average', 'created_at']
-        read_only_fields = ['id', 'title', 'total_likes', 'total_bookmarks',
-                            'total_comments', 'score_average']
+        fields = ['id', 'author', 'title',
+                  'total_likes', 'score_average', 'created_at']
+        read_only_fields = ['id', 'title', 'total_likes', 'score_average']
