@@ -2,6 +2,7 @@ from django.urls import path
 from .views import *
 from .social.views import *
 
+
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='user_login'),
     path(
@@ -20,4 +21,7 @@ urlpatterns = [
     path('naver/login/callback/',
          NaverSignInCallBackView.as_view(), name='naver_callback'),
     path('naver/login/', NaverLogin.as_view(), name='naver_login_finish'),
+
+    path('bookmark/', bookmark, name='bookmark-list'),
+    path('bookmark/<int:post_id>/', bookmark, name='bookmark-setting'),
 ]
