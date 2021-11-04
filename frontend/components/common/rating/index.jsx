@@ -2,14 +2,14 @@ import Rating from "@material-ui/lab/Rating";
 
 
 export default function RatingStar(props) {
-  const { value, onChange, ...otherProps } = props;
+  const { value, precision, onChange, ...otherProps } = props;
 
   return (
     <Rating
       name="rating"
-      value={value}
       defaultValue={0}
-      precision={0.5}
+      value={value? value : 0}
+      precision={precision}
       onChange={onChange}
       {...otherProps}
     />
