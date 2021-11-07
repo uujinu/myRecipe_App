@@ -17,13 +17,19 @@ class PostView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or self.action == 'retrieve':
             return (AllowAny(),)
         return super().get_permissions()
 
     def get_serializer_class(self):
         if self.action == 'create':
             return PostWriteSerializer
+
+        if self.action == 'list':
+            return PostListSerializer
+
+        if self.action == 'retrieve':
+            return PostDetailSerializer
 
     def convert_test(self, img, w, h):
         temp = Image.open(img).copy()
@@ -36,10 +42,6 @@ class PostView(viewsets.ModelViewSet):
         img.save(res, format='JPEG', quality=95)
         res.seek(0)
         return res
-
-
-        if self.action == 'list':
-            return PostListSerializer
 
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
@@ -71,6 +73,10 @@ class PostView(viewsets.ModelViewSet):
             imgArr = self.request.FILES.getlist('images')
             if (len(imgArr)):
                 tempArr = []
+                for img in imgArr:
+                    tempArr.append({'recipe_image': img})
+                request_data['images'] = tempArr
+
             # thumbnail
             if request_data['thumbnail'] == '':
                 request_data.pop('thumbnail')
@@ -80,10 +86,6 @@ class PostView(viewsets.ModelViewSet):
                 thumbnail = InMemoryUploadedFile(
                     file=converted, field_name="ImageField", name=img.name, content_type='image/jpeg', size=sys.getsizeof(converted), charset=None)
                 request_data['thumbnail'] = thumbnail
-
-                for img in imgArr:
-                    tempArr.append({'recipe_image': img})
-                request_data['images'] = tempArr
 
             kwargs['data'] = request_data.dict()
 
