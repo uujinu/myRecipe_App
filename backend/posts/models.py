@@ -46,7 +46,7 @@ class Post(models.Model):
     author = models.ForeignKey(
         'accounts.User', on_delete=models.CASCADE, related_name='post', null=True)
     title = models.CharField('제목', blank=False, max_length=126)
-
+    thumbnail = models.ImageField('썸네일', upload_to=url, blank=True, null=True)
     cook_portion = models.CharField(
         '분량', max_length=10, choices=PORTION_CHOICES)
     cook_time = models.CharField(
@@ -75,6 +75,9 @@ class Post(models.Model):
 
     def total_likes(self):
         return self.likes.count()
+
+    def total_bookmarks(self):
+        return self.bookmarks.count()
 
     def score_average(self):  # 평균 평점
         all_scores = self.comments.values()
