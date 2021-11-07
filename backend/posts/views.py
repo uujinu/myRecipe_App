@@ -1,10 +1,14 @@
+import sys
 import json
+from PIL import Image
+from io import BytesIO
 from rest_framework import status
 from .models import *
 from .serializers import *
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class PostView(viewsets.ModelViewSet):
@@ -20,6 +24,19 @@ class PostView(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return PostWriteSerializer
+
+    def convert_test(self, img, w, h):
+        temp = Image.open(img).copy()
+        temp = temp.convert('RGB')
+        temp.thumbnail((w, h), Image.ANTIALIAS)
+        return self.image_to_bytes(temp)
+
+    def image_to_bytes(self, img):
+        res = BytesIO()
+        img.save(res, format='JPEG', quality=95)
+        res.seek(0)
+        return res
+
 
         if self.action == 'list':
             return PostListSerializer
@@ -54,6 +71,16 @@ class PostView(viewsets.ModelViewSet):
             imgArr = self.request.FILES.getlist('images')
             if (len(imgArr)):
                 tempArr = []
+            # thumbnail
+            if request_data['thumbnail'] == '':
+                request_data.pop('thumbnail')
+            else:
+                img = request_data['thumbnail']
+                converted = self.convert_test(img, 620, 500)
+                thumbnail = InMemoryUploadedFile(
+                    file=converted, field_name="ImageField", name=img.name, content_type='image/jpeg', size=sys.getsizeof(converted), charset=None)
+                request_data['thumbnail'] = thumbnail
+
                 for img in imgArr:
                     tempArr.append({'recipe_image': img})
                 request_data['images'] = tempArr
