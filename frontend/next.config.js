@@ -11,4 +11,7 @@ module.exports = {
       ];
     }
   },
+  images: {
+    domains: ["recipeaws.s3.amazonaws.com"],
+  },
 };
