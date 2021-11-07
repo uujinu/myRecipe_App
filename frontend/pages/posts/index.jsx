@@ -320,13 +320,13 @@ export default function RecipeList({ list }) {
                   pk={user.pk}
                   recipeInfo={list[0]}
                   marks={marks}
-                  src="/platter.jpg"
+                  src={list[0]['thumbnail']? list[0]['thumbnail'] : "/thumb_basic.jpg"}
                 />
                 <RecipeCard
                   pk={user.pk}
                   recipeInfo={list[1]}
                   marks={marks}
-                  src="/kimchi-rice.jpg"
+                  src={list[1]['thumbnail']? list[1]['thumbnail'] : "/thumb_basic.jpg"}
                 />
               </TDRecipeBox>
             </TDRecipeWrapper>
