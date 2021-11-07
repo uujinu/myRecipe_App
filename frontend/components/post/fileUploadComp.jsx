@@ -1,8 +1,9 @@
 import styled from "styled-components";
-import { useRef } from "react";
-import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import { useRef, useState, useEffect } from "react";
+import AddPhotoAlternateIcon from "@material-ui/icons/AddPhotoAlternate";
 import { IconButton } from "@material-ui/core";
-import ClearIcon from '@material-ui/icons/Clear';
+import ClearIcon from "@material-ui/icons/Clear";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 
 const FileUploadContainer = styled.div`
@@ -71,6 +72,13 @@ const MultipleFilePreveiwContainer = styled.div`
   justify-content: space-evenly;
 
   border: ${(props) => props.display ? "4px dotted #e9e9e9" : "none"};
+
+  &:after {
+    content: "사진을 클릭하면 썸네일로 지정돼요.";
+    position: absolute;
+    bottom: -30px;
+    color: #f44336;
+  }
 `;
 
 const MultiFileBox = styled.div`
@@ -83,6 +91,10 @@ const MultiFileBox = styled.div`
   width: 150px;
   height: 150px;
   margin: 0 5px;
+  &:hover {
+    border: ${(props) => props.thumbnail !== undefined ? "4px solid #fb8752" : "none"};
+  }
+
 `;
 
 const ImagePreview = styled.img`
@@ -105,14 +117,24 @@ const DragDropText = styled.p`
   display: ${(props) => props.text? "": "none"};
 `;
 
+const Thumb = styled.div`
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 24px;
+`;
 
 export default function FileUploadComps({text, wide, removeFunc, name, value, handle, multiple, ...otherProps}) {
-  
+  const [thumb, setThumb] = useState(value.thumbnail);
   const fileInputField = useRef(null);
   const handleUploadBtnClick = () => {
     fileInputField.current.click();
   };
-  const { height, width } = otherProps;
+  const { height, width, thumbnail } = otherProps;
+
+  useEffect(() => {
+    setThumb(value.thumbnail);
+  }, [value.thumbnail]);
 
   return (
     <>
@@ -144,18 +166,28 @@ export default function FileUploadComps({text, wide, removeFunc, name, value, ha
         }
         </FileUploadContainer>
         {multiple &&
-          <MultipleFilePreveiwContainer display={Object.keys(value).length}>
-            {Object.keys(value).map((fileName, idx) => (
-              <MultiFileBox key={idx}>
-                <ImagePreview 
-                  src={URL.createObjectURL(value[fileName])}
+          <MultipleFilePreveiwContainer display={Object.keys(value.images).length}>
+            {Object.keys(value.images).map((fileName, idx) => (
+              <MultiFileBox key={idx} thumbnail={thumbnail} borderFix={thumb===fileName}>
+                <ImagePreview
+                  id={fileName}
+                  onClick={thumbnail}
+                  src={URL.createObjectURL(value.images[fileName])}
                 />
+                {thumb === fileName &&
+                  <Thumb>
+                    <IconButton size="small">
+                      <CheckCircleIcon />
+                    </IconButton>
+                  </Thumb>
+                }
                 <RemoveBtn onClick={()=>removeFunc(name, fileName)}>
                   <IconButton size="small">
                     <ClearIcon />
                   </IconButton>
                 </RemoveBtn>
               </MultiFileBox>
+
             ))}
           </MultipleFilePreveiwContainer>
         }
