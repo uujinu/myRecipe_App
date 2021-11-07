@@ -674,7 +674,7 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     Object.values(input.images.images).map((value) => {
       formData.append("images", value);
       if (value.name === input.images.thumbnail) {
-        formData.append("thumbnails", value);
+        formData.append("thumbnail", value);
       }
     })
     
