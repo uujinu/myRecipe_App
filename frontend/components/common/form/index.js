@@ -4,20 +4,20 @@ import styled from "styled-components";
 const FormWrapper = styled.form`
   display: flex;
   flex-direction: column;
-`
+`;
 
 export function useForm(initialValues, validateOnChange = false, validate) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
 
-  const handleInputChange = e => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setValues({
       ...values,
-      [name]: value
+      [name]: value,
     });
     if (validateOnChange) {
-      validate({ [name]: value })
+      validate({ [name]: value });
     }
   };
 
@@ -32,9 +32,9 @@ export function useForm(initialValues, validateOnChange = false, validate) {
     errors,
     setErrors,
     handleInputChange,
-    resetForm
+    resetForm,
   };
-};
+}
 
 export default function Form(props) {
   const { children, ...other } = props;
@@ -42,5 +42,5 @@ export default function Form(props) {
     <FormWrapper autoComplete="off" {...other}>
       {children}
     </FormWrapper>
-  )
-};
+  );
+}

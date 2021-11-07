@@ -1,4 +1,5 @@
-import React from "react";
+/* eslint-disable no-underscore-dangle */
+import React, { useEffect } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 import {
   StylesProvider,
@@ -6,12 +7,11 @@ import {
 } from "@material-ui/styles";
 import { CssBaseline } from "@material-ui/core";
 import Head from "next/head";
-import theme from "../styles/theme";
 import "../styles/globals.css";
-import { wrapper } from "../redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { useStore } from "react-redux";
-import { useEffect } from "react";
+import theme from "../styles/theme";
+import { wrapper } from "../redux/store";
 
 function MyApp(props) {
   const { Component, pageProps } = props;
@@ -28,10 +28,7 @@ function MyApp(props) {
     <>
       <Head>
         <title>MyRecipe</title>
-        <meta
-          name="viewport"
-          content="initial-scale=1.0, width=device-width"
-        />
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
       <StylesProvider injectFirst>
         <StyledThemeProvider theme={theme}>
@@ -44,14 +41,17 @@ function MyApp(props) {
               />
             </Head>
             <CssBaseline />
-            <PersistGate persistor={store.__persistor} loading={<div>loading...</div>}>
+            <PersistGate
+              persistor={store.__persistor}
+              loading={<div>loading...</div>}
+            >
               <Component {...pageProps} />
             </PersistGate>
           </MuiThemeProvider>
         </StyledThemeProvider>
       </StylesProvider>
     </>
-  )
+  );
 }
 
 export default wrapper.withRedux(MyApp);

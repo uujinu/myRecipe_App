@@ -1,13 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginUser } from "./thunk/auth";
 
-
 const initialState = {
   accessJWT: "",
   isLoading: false,
   isAuth: false,
   error: "",
-}
+};
 
 const loginSlice = createSlice({
   name: "login",
@@ -41,7 +40,7 @@ const loginSlice = createSlice({
       state.accessJWT = "";
       state.error = action.error.message;
     },
-  }
+  },
 });
 
 const { reducer, actions } = loginSlice;

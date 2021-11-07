@@ -16,14 +16,14 @@ export function SnackBar() {
   return {
     open,
     handleOpen,
-    handleClose
-  }
-};
+    handleClose,
+  };
+}
 
 export default function InfoBox({ open, onClose, message, id }) {
   return (
     <Snackbar
-      anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       autoHideDuration={3000}
       open={open}
       onClose={onClose}
@@ -35,5 +35,5 @@ export default function InfoBox({ open, onClose, message, id }) {
         </Button>
       }
     />
-  )
-};
+  );
+}

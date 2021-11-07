@@ -1,8 +1,5 @@
-import SignUp from "@components/auth/signup"
-
+import SignUp from "@components/auth/signup";
 
 export default function LoginPage() {
-  return (
-    <SignUp />
-  )
+  return <SignUp />;
 }

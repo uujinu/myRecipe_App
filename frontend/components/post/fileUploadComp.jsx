@@ -3,8 +3,7 @@ import { useRef, useState, useEffect } from "react";
 import AddPhotoAlternateIcon from "@material-ui/icons/AddPhotoAlternate";
 import { IconButton } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/Clear";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 
 const FileUploadContainer = styled.div`
   ${(props) => props.wide && props.theme.breakpoints.down("sm")} {
@@ -17,18 +16,18 @@ const FileUploadContainer = styled.div`
   align-items: center;
   display: flex;
   align-items: center;
-  width: ${(props) => props.width? props.width: "160"}px;
-  height: ${(props) => props.height? props.height: "160"}px;
+  width: ${(props) => (props.width ? props.width : "160")}px;
+  height: ${(props) => (props.height ? props.height : "160")}px;
   color: #b7b2af;
   position: relative;
   justify-content: center;
   margin-right: 20px;
 
   &:hover {
-      border: 4px dotted #fad5c4;
+    border: 4px dotted #fad5c4;
   }
 `;
-    
+
 const UploadBtn = styled.div`
   z-index: 1;
   background-color: transparent;
@@ -71,7 +70,7 @@ const MultipleFilePreveiwContainer = styled.div`
   border-radius: 6px;
   justify-content: space-evenly;
 
-  border: ${(props) => props.display ? "4px dotted #e9e9e9" : "none"};
+  border: ${(props) => (props.display ? "4px dotted #e9e9e9" : "none")};
 
   &:after {
     content: "사진을 클릭하면 썸네일로 지정돼요.";
@@ -92,9 +91,9 @@ const MultiFileBox = styled.div`
   height: 150px;
   margin: 0 5px;
   &:hover {
-    border: ${(props) => props.thumbnail !== undefined ? "4px solid #fb8752" : "none"};
+    border: ${(props) =>
+      props.thumbnail !== undefined ? "4px solid #fb8752" : "none"};
   }
-
 `;
 
 const ImagePreview = styled.img`
@@ -114,7 +113,7 @@ const DragDropText = styled.p`
   font-weight: bold;
   letter-spacing: 2.2px;
   margin: 0;
-  display: ${(props) => props.text? "": "none"};
+  display: ${(props) => (props.text ? "" : "none")};
 `;
 
 const Thumb = styled.div`
@@ -124,7 +123,16 @@ const Thumb = styled.div`
   right: 24px;
 `;
 
-export default function FileUploadComps({text, wide, removeFunc, name, value, handle, multiple, ...otherProps}) {
+export default function FileUploadComps({
+  text,
+  wide,
+  removeFunc,
+  name,
+  value,
+  handle,
+  multiple,
+  ...otherProps
+}) {
   const [thumb, setThumb] = useState(value.thumbnail);
   const fileInputField = useRef(null);
   const handleUploadBtnClick = () => {
@@ -140,9 +148,11 @@ export default function FileUploadComps({text, wide, removeFunc, name, value, ha
     <>
       <FileUploadContainer wide={wide} height={height} width={width}>
         <UploadBtn onClick={handleUploadBtnClick}>
-          <AddPhotoAlternateIcon fontSize="large"/>
+          <AddPhotoAlternateIcon fontSize="large" />
         </UploadBtn>
-        <DragDropText text={text}>최대 5장까지 업로드할 수 있어요.</DragDropText>
+        <DragDropText text={text}>
+          최대 5장까지 업로드할 수 있어요.
+        </DragDropText>
         <UploadFile
           type="file"
           ref={fileInputField}
@@ -152,45 +162,48 @@ export default function FileUploadComps({text, wide, removeFunc, name, value, ha
           multiple={multiple}
           onChange={handle}
         />
-        {!multiple && value &&
+        {!multiple && value && (
           <FilePreviewContainer>
-            <ImagePreview 
-              src={URL.createObjectURL(value)}
-            />
-            <RemoveBtn onClick={()=>removeFunc(name)}>
+            <ImagePreview src={URL.createObjectURL(value)} />
+            <RemoveBtn onClick={() => removeFunc(name)}>
               <IconButton size="small">
                 <ClearIcon />
               </IconButton>
             </RemoveBtn>
           </FilePreviewContainer>
-        }
-        </FileUploadContainer>
-        {multiple &&
-          <MultipleFilePreveiwContainer display={Object.keys(value.images).length}>
-            {Object.keys(value.images).map((fileName, idx) => (
-              <MultiFileBox key={idx} thumbnail={thumbnail} borderFix={thumb===fileName}>
-                <ImagePreview
-                  id={fileName}
-                  onClick={thumbnail}
-                  src={URL.createObjectURL(value.images[fileName])}
-                />
-                {thumb === fileName &&
-                  <Thumb>
-                    <IconButton size="small">
-                      <CheckCircleIcon />
-                    </IconButton>
-                  </Thumb>
-                }
-                <RemoveBtn onClick={()=>removeFunc(name, fileName)}>
+        )}
+      </FileUploadContainer>
+      {multiple && (
+        <MultipleFilePreveiwContainer
+          display={Object.keys(value.images).length}
+        >
+          {Object.keys(value.images).map((fileName) => (
+            <MultiFileBox
+              key={fileName}
+              thumbnail={thumbnail}
+              borderFix={thumb === fileName}
+            >
+              <ImagePreview
+                id={fileName}
+                onClick={thumbnail}
+                src={URL.createObjectURL(value.images[fileName])}
+              />
+              {thumb === fileName && (
+                <Thumb>
                   <IconButton size="small">
-                    <ClearIcon />
+                    <CheckCircleIcon />
                   </IconButton>
-                </RemoveBtn>
-              </MultiFileBox>
-
-            ))}
-          </MultipleFilePreveiwContainer>
-        }
+                </Thumb>
+              )}
+              <RemoveBtn onClick={() => removeFunc(name, fileName)}>
+                <IconButton size="small">
+                  <ClearIcon />
+                </IconButton>
+              </RemoveBtn>
+            </MultiFileBox>
+          ))}
+        </MultipleFilePreveiwContainer>
+      )}
     </>
-  )
+  );
 }

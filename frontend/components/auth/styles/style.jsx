@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-
 export const Container = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
     width: 100%;
@@ -62,7 +61,7 @@ export const BottomWrapper = styled.div`
 `;
 
 export const Visible = styled.div`
-  display: ${(props) => props.auth === "signup" ? "none" : ""}
+  display: ${(props) => (props.auth === "signup" ? "none" : "")};
 `;
 
 export const SignUpLink = styled.a`
@@ -73,7 +72,7 @@ export const SignUpLink = styled.a`
 `;
 
 export const SocialImage = styled.div`
-  margin-top: ${(props) => props.auth === "signup" ? "15px" : "35px"};
+  margin-top: ${(props) => (props.auth === "signup" ? "15px" : "35px")};
   border-top: 1px solid #e1e1e1;
   width: 100%;
   display: flex;

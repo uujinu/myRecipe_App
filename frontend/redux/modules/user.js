@@ -5,11 +5,11 @@ const initialState = {
     email: "",
     nickname: "",
     pk: null,
-    profile_image: null
+    profile_image: null,
   },
   isLoading: false,
   error: "",
-  status: ""
+  status: "",
 };
 
 const userSlice = createSlice({
@@ -25,7 +25,7 @@ const userSlice = createSlice({
     userLogout: (state) => {
       state.user = initialState.user;
     },
-  }
+  },
 });
 
 const { reducer, actions } = userSlice;

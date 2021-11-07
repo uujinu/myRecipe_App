@@ -7,7 +7,5 @@ const CustomTextField = styled(TextField)`
 `;
 
 export default function TextFieldWrapper(props) {
-  return (
-    <CustomTextField {...props}/>
-  );
+  return <CustomTextField {...props} />;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import styled, { css } from "styled-components";
@@ -7,14 +8,13 @@ import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
 import { selectUser } from "@slice/user";
 import AvatarElement from "../avatar/avatarElement";
 
-
 const NavBar = styled(AppBar)`
   align-items: center;
   position: fixed;
   -webkit-transition-property: background-color, box-shadow, transform;
   -webkit-transition-timing-function: cubic-bezier(0.24, 1.03, 1, 1);
   box-shadow: 0 2px 6px 0 rgb(0 0 0 / 15%);
-  background-color: ${(props) => props.fix ? "#fad5c4": "#fad5c4ab"};
+  background-color: ${(props) => (props.fix ? "#fad5c4" : "#fad5c4ab")};
 
   ${(props) =>
     props.scroll > 200 &&
@@ -101,27 +101,28 @@ const ScrollTracker = () => {
 };
 
 const Buttons = (props) => {
+  // eslint-disable-next-line react/destructuring-assignment
   const { pk, nickname, profile_image } = props.user;
   const LoginElement = () => {
     return (
       <LoginBtn>
-      <Link href="/accounts/login" passHref>
-        <a href="replace">JOIN</a>
-      </Link>
-    </LoginBtn>
+        <Link href="/accounts/login" passHref>
+          <a href="replace">JOIN</a>
+        </Link>
+      </LoginBtn>
     );
-  }
+  };
   const AvatarMenu = () => {
     return (
       <AvatarWrapper>
         <AvatarElement pk={pk} name={nickname} profile_image={profile_image} />
       </AvatarWrapper>
     );
-  }
+  };
 
   if (pk === null) return <LoginElement />;
-  else return <AvatarMenu />;
-}
+  return <AvatarMenu />;
+};
 
 export default function Header({ fix }) {
   const { scrollY, hide } = ScrollTracker();

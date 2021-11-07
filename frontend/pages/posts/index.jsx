@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectUser } from "@slice/user";
@@ -5,20 +6,24 @@ import styled from "styled-components";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
-import axiosWrapper from "../../src/helpers/axiosWrapper";
 import RatingStar from "@components/common/rating";
 import CommonLayout from "@components/layout/common";
-import TopBtn from "@components/common/scrollTopBtn"
+import TopBtn from "@components/common/scrollTopBtn";
 import InfoBox, { SnackBar } from "@components/common/snackbar/index";
 import TurnedInNotOutlinedIcon from "@material-ui/icons/TurnedInNotOutlined";
 import TurnedInRoundedIcon from "@material-ui/icons/TurnedInRounded";
-
+import axiosWrapper from "../../src/helpers/axiosWrapper";
 
 const ListContainer = styled.div`
   max-width: 1980px;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(to bottom,#FFF 12%,rgb(255 236 212 / 27%) 15.74%,rgb(250 225 213) 100%);
+  background: linear-gradient(
+    to bottom,
+    #fff 12%,
+    rgb(255 236 212 / 27%) 15.74%,
+    rgb(250 225 213) 100%
+  );
 `;
 
 const ListWrapper = styled.div`
@@ -114,8 +119,8 @@ const ImgWrapper = styled.div`
 
   & > div.info {
     transition-property: opacity;
-    -webkit-transition: .4s ease-out;
-    transition: .4s ease-out;
+    -webkit-transition: 0.4s ease-out;
+    transition: 0.4s ease-out;
     opacity: 0;
   }
 
@@ -139,8 +144,8 @@ const ImgItem = styled.div`
   & > div > img {
     -webkit-transform: scale(1);
     transform: scale(1);
-    -webkit-transition: .4s ease-out;
-    transition: .4s ease-out;
+    -webkit-transition: 0.4s ease-out;
+    transition: 0.4s ease-out;
   }
 
   & > div > img:hover {
@@ -207,26 +212,30 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
   useEffect(() => {
     if (pk) {
       // 해당 포스트의 북마크 여부 확인
-      const res = marks.find(pk => pk === info.id);
+      const res = marks.find((m) => m === info.id);
       if (res) setMark(true);
       else setMark(false);
     }
-  }, [marks])
+  }, [marks]);
 
   const handleMark = (e) => {
     if (pk) {
-      const method = mark? "delete" : "post";
-      setMsg(mark? "북마크가 취소되었습니다." : "북마크되었습니다.");
+      const method = mark ? "delete" : "post";
+      setMsg(mark ? "북마크가 취소되었습니다." : "북마크되었습니다.");
       setMark(!mark);
 
-      axiosWrapper(method, `/accounts/bookmark/${info.id}/`, undefined, (res) => {
-        handleOpen();
-      }, (err) => {
+      axiosWrapper(
+        method,
+        `/accounts/bookmark/${info.id}/`,
+        undefined,
+        (res) => {
+          handleOpen();
+        },
+        () => {
           alert("오류가 발생했습니다.");
-        }
+        },
       );
-    }
-    else {
+    } else {
       alert("로그인이 필요합니다.");
     }
   };
@@ -236,9 +245,10 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
       <RCard>
         <ImgWrapper>
           <Link href={`/posts/${info.id}`} passHref>
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a>
               <ImgItem>
-                <Image src={src} alt="img" layout="fill" objectFit="cover"/>
+                <Image src={src} alt="img" layout="fill" objectFit="cover" />
               </ImgItem>
             </a>
           </Link>
@@ -246,39 +256,24 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
         <RecipeDetail className="info">
           <div>
             <Link href={`/posts/${info.id}`} passHref>
-              <RecipeTitle>
-                {info.title}
-              </RecipeTitle>
+              <RecipeTitle>{info.title}</RecipeTitle>
             </Link>
             <RecipeMark onClick={handleMark}>
-              {mark &&
-                <TurnedInRoundedIcon />
-              }
-              {!mark &&
-                <TurnedInNotOutlinedIcon />
-              }
-            </RecipeMark> 
+              {mark && <TurnedInRoundedIcon />}
+              {!mark && <TurnedInNotOutlinedIcon />}
+            </RecipeMark>
           </div>
           <RatingBox>
-            <RatingStar
-              value={info.score_average}
-              precision={0.1}
-              readOnly={true}
-            />
-            <div style={{fontSize: "15px"}}>
-              ({info.score_average? info.score_average : 0})
+            <RatingStar value={info.score_average} precision={0.1} readOnly />
+            <div style={{ fontSize: "15px" }}>
+              ({info.score_average ? info.score_average : 0})
             </div>
           </RatingBox>
         </RecipeDetail>
       </RCard>
-      <InfoBox
-        open={open}
-        onClose={handleClose}
-        message={msg}
-        id={info.id}
-      />
+      <InfoBox open={open} onClose={handleClose} message={msg} id={info.id} />
     </>
-  )
+  );
 }
 
 export default function RecipeList({ list }) {
@@ -288,11 +283,17 @@ export default function RecipeList({ list }) {
   useEffect(() => {
     // 로그인한 유저에 대해서만 북마크 목록 불러옴
     if (user.pk) {
-      axiosWrapper("get", "http://localhost:8000/accounts/bookmark/", undefined, (res) => {
-        setMarks(res.data.bookmarks);
-      }, (err) => {
-        console.log("err: ", err);
-      })
+      axiosWrapper(
+        "get",
+        "http://localhost:8000/accounts/bookmark/",
+        undefined,
+        (res) => {
+          setMarks(res.data.bookmarks);
+        },
+        (err) => {
+          console.log("err: ", err);
+        },
+      );
     }
   }, []);
 
@@ -305,9 +306,7 @@ export default function RecipeList({ list }) {
     <CommonLayout fix={0}>
       <TitleBack>
         <TitleBox>
-          <PageTitle>
-            맛있는 레시피가 한가득!
-          </PageTitle>
+          <PageTitle>맛있는 레시피가 한가득!</PageTitle>
         </TitleBox>
       </TitleBack>
       <ListContainer>
@@ -320,13 +319,17 @@ export default function RecipeList({ list }) {
                   pk={user.pk}
                   recipeInfo={list[0]}
                   marks={marks}
-                  src={list[0]['thumbnail']? list[0]['thumbnail'] : "/thumb_basic.jpg"}
+                  src={
+                    list[0].thumbnail ? list[0].thumbnail : "/thumb_basic.jpg"
+                  }
                 />
                 <RecipeCard
                   pk={user.pk}
                   recipeInfo={list[1]}
                   marks={marks}
-                  src={list[1]['thumbnail']? list[1]['thumbnail'] : "/thumb_basic.jpg"}
+                  src={
+                    list[1].thumbnail ? list[1].thumbnail : "/thumb_basic.jpg"
+                  }
                 />
               </TDRecipeBox>
             </TDRecipeWrapper>
@@ -335,15 +338,14 @@ export default function RecipeList({ list }) {
       </ListContainer>
       <TopBtn />
     </CommonLayout>
-  )
-};
+  );
+}
 
-export async function getServerSideProps(ctx) {
-  
+export async function getServerSideProps() {
   const res = await axios.get("http://localhost:8000/posts/post/");
   return {
     props: {
-      list: res.data
+      list: res.data,
     },
-  } 
+  };
 }

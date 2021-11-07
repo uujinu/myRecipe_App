@@ -10,12 +10,12 @@ const ScrollTopBtn = styled(IconButton)`
 
 export default function TopBtn() {
   const scrollToTop = () => {
-    window.scrollTo({top: 0, behavior: "smooth"});
-  }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <ScrollTopBtn onClick={scrollToTop}>
-        <VerticalAlignTopRoundedIcon />
+      <VerticalAlignTopRoundedIcon />
     </ScrollTopBtn>
   );
 }
