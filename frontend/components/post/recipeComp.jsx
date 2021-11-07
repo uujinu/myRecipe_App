@@ -359,11 +359,11 @@ function ListForm(state, setState, initialState, parent, prefix) {
     if (name === "images") {
       if (newFiles.length) {
         for (let file of newFiles) {
-          if (Object.keys(state.images).length >= 5) {
+          if (Object.keys(state.images.images).length >= 5) {
             alert("최대 5장까지 업로드할 수 있습니다.");
             break;
           }
-          state.images[file.name] = file;
+          state.images.images[file.name] = file;
         }
         setState({...state});
       }
@@ -379,11 +379,13 @@ function ListForm(state, setState, initialState, parent, prefix) {
       }
     }
     console.log("state: ", state);
-  }
+  };
 
   const removeFiles = (name, fileName) => {
     if (name === "images") {
-      delete state.images[fileName];
+      delete state.images.images[fileName];
+      // 삭제할 이미지가 썸네일로 선택된 경우 썸네일 초기화
+      if (state.images.thumbnail === fileName) state.images.thumbnail = "";
       setState({...state});
     } else {
       const id = name.split("_")[0];
@@ -392,14 +394,21 @@ function ListForm(state, setState, initialState, parent, prefix) {
       setState({...state});
     }
     console.log("state: ", state);
-  }
+  };
+
+  const handleThumbNail = (e) => {
+    if (state.images.thumbnail === e.target.id) state.images.thumbnail = "";
+    else state.images.thumbnail = e.target.id;
+    setState({...state});
+  };
 
   return {
     DelBtn,
     AddBtn,
     handleItem,
     addFiles,
-    removeFiles
+    removeFiles,
+    handleThumbNail
   };
 }
 
@@ -533,7 +542,7 @@ function StepList({stepState, handleMainChange}) {
 }
 
 function Images({state, setState}) {
-  const { addFiles, removeFiles } = ListForm(state, setState)
+  const { addFiles, removeFiles, handleThumbNail } = ListForm(state, setState);
 
   return (
     <FileUploadComps
@@ -547,6 +556,7 @@ function Images({state, setState}) {
       handle={addFiles}
       width="600"
       height="80"
+      thumbnail={handleThumbNail}
     />
   )
 }
@@ -566,7 +576,10 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     description: "",
     ingredient: {},
     cookStep: {},
-    images: {},
+    images: {
+      thumbnail: "",
+      images: {}
+    },
     content: ""
   };
 
@@ -658,8 +671,11 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     });
 
     // images
-    Object.values(input.images).map((value) => {
+    Object.values(input.images.images).map((value) => {
       formData.append("images", value);
+      if (value.name === input.images.thumbnail) {
+        formData.append("thumbnails", value);
+      }
     })
     
     const url = method === "post" ? "/posts/post/" : `/posts/post/${postId}/`;
