@@ -106,6 +106,32 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'author', 'title',
+        fields = ['id', 'author', 'title', 'thumbnail',
                   'total_likes', 'score_average', 'created_at']
         read_only_fields = ['id', 'title', 'total_likes', 'score_average']
+
+
+class PostDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['author'] = UserSerializer(instance.author).data
+        repr['created_at'] = instance.datetime
+
+        repr['cooksteps'] = CookStepSerializer(
+            instance.cooksteps, many=True).data
+        repr['images'] = RecipeImageSerializer(instance.images, many=True).data
+        repr['ingredients'] = IngredientSerializer(
+            instance.ingredients, many=True).data
+
+        try:
+            repr['comments'] = CommentSerializer(
+                instance.comments, many=True).data
+        except:
+            repr['comments'] = None
+        return repr
+
+    class Meta:
+        model = Post
+        fields = ['title', 'thumbnail', 'total_likes', 'score_average',
+                  'total_comments', 'total_bookmarks']
+        read_only_fields = ['title', 'thumbnail']
