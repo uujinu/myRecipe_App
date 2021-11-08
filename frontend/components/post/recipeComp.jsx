@@ -1,14 +1,20 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable radix */
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import { Select, FormControl, IconButton, InputLabel as MuiInputLabel } from "@material-ui/core";
-import CommonLayout from "../layout/common";
+import {
+  Select,
+  FormControl,
+  IconButton,
+  InputLabel as MuiInputLabel,
+} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CreateIcon from "@material-ui/icons/Create";
+import CommonLayout from "../layout/common";
 import FileUploadComps from "./fileUploadComp";
 import ButtonWrapper from "../common/button";
 import axiosWrapper from "../../src/helpers/axiosWrapper";
-
 
 const PostContainer = styled.form`
   ${(props) => props.theme.breakpoints.down("sm")} {
@@ -71,7 +77,7 @@ const InputLabel = styled.label`
 
   &:after {
     content: "*";
-    display: ${(props)=> props.fill? "" : "none"};
+    display: ${(props) => (props.fill ? "" : "none")};
     position: absolute;
     font-size: 14px;
     color: #fb8752;
@@ -213,7 +219,7 @@ const CookStepNum = styled.p`
   width: 130px;
   font-size: 20px;
   margin: 0;
-  padding : 6px 0 0 0;
+  padding: 6px 0 0 0;
 `;
 
 const CookStepList = styled.ul`
@@ -251,7 +257,7 @@ const CookStepText = styled.textarea`
 const BoxWrapper = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
     flex-direction: row;
-    width: 100%
+    width: 100%;
   }
   display: flex;
   align-items: center;
@@ -301,10 +307,13 @@ const BtnBox = styled.div`
   }
 `;
 
-
-function InfoForm({id, label, name, value, select, func}) {
+function InfoForm({ id, label, name, value, select, func }) {
   return (
-    <FormControl required variant="outlined" style={{margin: "10px 25px 0 0"}}>
+    <FormControl
+      required
+      variant="outlined"
+      style={{ margin: "10px 25px 0 0" }}
+    >
       <MuiInputLabel id={id}>{label}</MuiInputLabel>
       <SelectInput
         labelId={id}
@@ -314,20 +323,23 @@ function InfoForm({id, label, name, value, select, func}) {
         onChange={func}
         label={label}
       >
-        {select.map((s, idx) => {
-          return <option key={idx} value={s[0]}>{s[1]}</option>
+        {select.map((s) => {
+          return (
+            <option key={s[0]} value={s[0]}>
+              {s[1]}
+            </option>
+          );
         })}
       </SelectInput>
     </FormControl>
-  )
+  );
 }
 
 function ListForm(state, setState, initialState, parent, prefix) {
-
   const DelBtn = (e) => {
-    const _id = e.target.id;
-    delete state[_id];
-    setState({...state});
+    const { id } = e.target;
+    delete state[id];
+    setState({ ...state });
     console.log("remove: ", state);
   };
 
@@ -335,13 +347,13 @@ function ListForm(state, setState, initialState, parent, prefix) {
     if (parent) {
       let nextId;
       if (parent.hasChildNodes()) {
-        nextId = parseInt((parent.lastChild.id).split("-")[1]) + 1;
+        nextId = parseInt(parent.lastChild.id.split("-")[1]) + 1;
       } else nextId = 1;
 
-      state[prefix + nextId] = initialState[prefix + "1"];
-      setState({...state});
+      state[prefix + nextId] = initialState[`${prefix}1`];
+      setState({ ...state });
       console.log("add: ", state);
-    }   
+    }
   };
 
   const handleItem = (e) => {
@@ -349,7 +361,7 @@ function ListForm(state, setState, initialState, parent, prefix) {
     const id = name.split("_")[0];
     const idx = name.split("_")[1];
     state[id][idx] = value;
-    setState({...state});
+    setState({ ...state });
   };
 
   const addFiles = (e) => {
@@ -358,70 +370,84 @@ function ListForm(state, setState, initialState, parent, prefix) {
 
     if (name === "images") {
       if (newFiles.length) {
-        for (let file of newFiles) {
-          if (Object.keys(state.images).length >= 5) {
+        for (const file of newFiles) {
+          if (Object.keys(state.images.images).length >= 5) {
             alert("최대 5장까지 업로드할 수 있습니다.");
             break;
           }
-          state.images[file.name] = file;
+          state.images.images[file.name] = file;
         }
-        setState({...state});
+        setState({ ...state });
       }
-      
     } else {
       const id = name.split("_")[0];
       const idx = name.split("_")[1];
       if (newFiles.length) {
-        for (let file of newFiles) {
+        for (const file of newFiles) {
           state[id][idx] = file;
         }
-        setState({...state});
+        setState({ ...state });
       }
     }
     console.log("state: ", state);
-  }
+  };
 
   const removeFiles = (name, fileName) => {
     if (name === "images") {
-      delete state.images[fileName];
-      setState({...state});
+      delete state.images.images[fileName];
+      // 삭제할 이미지가 썸네일로 선택된 경우 썸네일 초기화
+      if (state.images.thumbnail === fileName) state.images.thumbnail = "";
+      setState({ ...state });
     } else {
       const id = name.split("_")[0];
       const idx = name.split("_")[1];
       delete state[id][idx];
-      setState({...state});
+      setState({ ...state });
     }
     console.log("state: ", state);
-  }
+  };
+
+  const handleThumbNail = (e) => {
+    if (state.images.thumbnail === e.target.id) state.images.thumbnail = "";
+    else state.images.thumbnail = e.target.id;
+    setState({ ...state });
+  };
 
   return {
     DelBtn,
     AddBtn,
     handleItem,
     addFiles,
-    removeFiles
+    removeFiles,
+    handleThumbNail,
   };
 }
 
-function IngList({ingState, handleMainChange}) {
+function IngList({ ingState, handleMainChange }) {
   const initialState = {
     "li-1": {
       name: "",
-      quantity: ""
+      quantity: "",
     },
     "li-2": {
       name: "",
-      quantity: ""
+      quantity: "",
     },
     "li-3": {
       name: "",
-      quantity: ""
+      quantity: "",
     },
   };
 
-  const [ing, setIng] = useState(ingState ? ingState : initialState);
+  const [ing, setIng] = useState(ingState || initialState);
   const parent = document.getElementById("ul-1");
-  const {DelBtn, AddBtn, handleItem} = ListForm(ing, setIng, initialState, parent, "li-");
+  const { DelBtn, AddBtn, handleItem } = ListForm(
+    ing,
+    setIng,
+    initialState,
+    parent,
+    "li-",
+  );
 
   useEffect(() => {
     handleMainChange("ingredient", ing);
@@ -438,7 +464,7 @@ function IngList({ingState, handleMainChange}) {
                   id={keys}
                   height="35"
                   maxLength="50"
-                  name={keys + "_name"}
+                  name={`${keys}_name`}
                   value={ing[keys].name}
                   placeholder="재료"
                   onChange={handleItem}
@@ -447,12 +473,16 @@ function IngList({ingState, handleMainChange}) {
                   id={keys}
                   height="35"
                   maxLength="50"
-                  name={keys + "_quantity"}
+                  name={`${keys}_quantity`}
                   value={ing[keys].quantity}
                   placeholder="용량"
                   onChange={handleItem}
                 />
-                <DeleteBtnWrapper id={keys} src="/btn_del.gif" onClick={DelBtn}/>
+                <DeleteBtnWrapper
+                  id={keys}
+                  src="/btn_del.gif"
+                  onClick={DelBtn}
+                />
               </ListWrapper>
             ))}
           </IngredientList>
@@ -464,25 +494,30 @@ function IngList({ingState, handleMainChange}) {
         </AddBtnWrapper>
       </IngListDiv>
     </>
-  )
+  );
 }
 
-function StepList({stepState, handleMainChange}) {
+function StepList({ stepState, handleMainChange }) {
   const initialState = {
     "sli-1": {
       description: "",
-      stepImage: ""
+      stepImage: "",
     },
     "sli-2": {
       description: "",
-      stepImage: ""
+      stepImage: "",
     },
   };
 
-  const [step, setStep] = useState(stepState ? stepState : initialState);
+  const [step, setStep] = useState(stepState || initialState);
   const parent = document.getElementById("step-list");
-  const {addFiles, removeFiles, DelBtn, AddBtn, handleItem} = ListForm(step, setStep, initialState, parent, "sli-");
-  
+  const { addFiles, removeFiles, DelBtn, AddBtn, handleItem } = ListForm(
+    step,
+    setStep,
+    initialState,
+    parent,
+    "sli-",
+  );
   useEffect(() => {
     handleMainChange("cookStep", step);
   }, [step]);
@@ -493,14 +528,14 @@ function StepList({stepState, handleMainChange}) {
         <CookStepList id="step-list">
           {Object.keys(step).map((keys, idx) => (
             <CookStepComb key={keys} id={keys}>
-              <CookStepNum>Step{idx+1}</CookStepNum>
+              <CookStepNum>Step{idx + 1}</CookStepNum>
               <CookStepLiWrapper key={keys} id={keys}>
                 <CookStepText
                   id={keys}
-                  name={keys + "_description"}
+                  name={`${keys}_description`}
                   value={step[keys].description}
                   height="160"
-                  placeholder={"Step" + (idx+1) + " 과정 설명"}
+                  placeholder={`Step ${idx + 1} 과정 설명`}
                   onChange={handleItem}
                 />
                 <BoxWrapper>
@@ -509,17 +544,21 @@ function StepList({stepState, handleMainChange}) {
                     wide={1}
                     removeFunc={removeFiles}
                     id={keys}
-                    name={keys + "_stepImage"}
+                    name={`${keys}_stepImage`}
                     value={step[keys].stepImage}
                     multiple={false}
                     handle={addFiles}
                   />
-                  <DeleteBtnWrapper id={keys} src="/btn_del.gif" onClick={DelBtn}/>
+                  <DeleteBtnWrapper
+                    id={keys}
+                    src="/btn_del.gif"
+                    onClick={DelBtn}
+                  />
                 </BoxWrapper>
               </CookStepLiWrapper>
             </CookStepComb>
           ))}
-        </CookStepList>  
+        </CookStepList>
         <BtnContainer>
           <AddBtnWrapper onClick={AddBtn}>
             <IconButton size="small">
@@ -529,11 +568,11 @@ function StepList({stepState, handleMainChange}) {
         </BtnContainer>
       </div>
     </>
-  )
+  );
 }
 
-function Images({state, setState}) {
-  const { addFiles, removeFiles } = ListForm(state, setState)
+function Images({ state, setState }) {
+  const { addFiles, removeFiles, handleThumbNail } = ListForm(state, setState);
 
   return (
     <FileUploadComps
@@ -543,16 +582,22 @@ function Images({state, setState}) {
       id="images"
       name="images"
       value={state.images}
-      multiple={true}
+      multiple
       handle={addFiles}
       width="600"
       height="80"
+      thumbnail={handleThumbNail}
     />
-  )
+  );
 }
 
-
-export default function Recipe({ingState, stepState, inputState, method, postId}) {
+export default function Recipe({
+  ingState,
+  stepState,
+  inputState,
+  method,
+  postId,
+}) {
   const [btn, setBtn] = useState(true);
   const [isLoading, setLoading] = useState(false);
   const router = useRouter();
@@ -566,18 +611,79 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     description: "",
     ingredient: {},
     cookStep: {},
-    images: {},
-    content: ""
+    images: {
+      thumbnail: "",
+      images: {},
+    },
+    content: "",
   };
 
-  const [input, setInput] = useState(inputState? inputState : initialState);
+  const [input, setInput] = useState(inputState || initialState);
 
-  const COOK_PORTION_SELECT = [["", ""], ["_1p", "1인분"], ["_2p", "2인분"], ["_3p", "3인분"], ["_4p", "4인분"], ["_5p", "5인분"], ["_6p", "6인분 이상"]];
-  const COOK_TIME_SELECT = [["", ""], ["_10m", "10분 이내"], ["_15m", "15분 이내"], ["_20m", "20분 이내"], ["_30m", "30분 이내"], ["_60m", "60분 이내"], ["_90m", "90분 이내"], ["_2h", "2시간 이내"], ["_2hp", "2시간 이상"]];
-  const COOK_DEGREE_SELECT = [["", ""], ["_d1", "아무나"], ["_d2", "초급"], ["_d3", "중급"], ["_d4", "고급"]];
+  const COOK_PORTION_SELECT = [
+    ["", ""],
+    ["_1p", "1인분"],
+    ["_2p", "2인분"],
+    ["_3p", "3인분"],
+    ["_4p", "4인분"],
+    ["_5p", "5인분"],
+    ["_6p", "6인분 이상"],
+  ];
+  const COOK_TIME_SELECT = [
+    ["", ""],
+    ["_10m", "10분 이내"],
+    ["_15m", "15분 이내"],
+    ["_20m", "20분 이내"],
+    ["_30m", "30분 이내"],
+    ["_60m", "60분 이내"],
+    ["_90m", "90분 이내"],
+    ["_2h", "2시간 이내"],
+    ["_2hp", "2시간 이상"],
+  ];
+  const COOK_DEGREE_SELECT = [
+    ["", ""],
+    ["_d1", "아무나"],
+    ["_d2", "초급"],
+    ["_d3", "중급"],
+    ["_d4", "고급"],
+  ];
+
+  const handleBtn = () => {
+    const val =
+      input.title &&
+      input.description &&
+      input.cookPortion &&
+      input.cookTime &&
+      input.cookDegree;
+    let ing = false;
+    let step = false;
+
+    // 재료 입력 확인
+    if (Object.keys(input.ingredient).length) {
+      Object.keys(input.ingredient).map((keys) => {
+        if (input.ingredient[keys].name && input.ingredient[keys].quantity)
+          ing = true;
+      });
+    }
+
+    // 과정 입력 확인
+    if (Object.keys(input.cookStep).length) {
+      Object.keys(input.cookStep).map((keys) => {
+        if (input.cookStep[keys].description) step = true;
+        else {
+          // eslint-disable-next-line no-lonely-if
+          if (Object.keys(input.cookStep[keys].stepImage).length) step = false;
+        }
+      });
+    }
+
+    // 필수 요소 입력 확인
+    if (val && ing && step) setBtn(false);
+    else setBtn(true);
+  };
 
   const handleChange = (e) => {
-    const name = e.target.name;
+    const { name } = e.target;
     setInput({
       ...input,
       [name]: e.target.value,
@@ -593,40 +699,10 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     handleBtn();
   };
 
-  const handleBtn = () => {
-    const val = input.title && input.description && input.cookPortion && input.cookTime && input.cookDegree;
-    let ing = false;
-    let step = false;
-
-    // 재료 입력 확인
-    if (Object.keys(input.ingredient).length) {
-      Object.keys(input.ingredient).map((keys) => {
-        if (input.ingredient[keys].name && input.ingredient[keys].quantity)
-          ing = true;
-      })
-    }
-
-    // 과정 입력 확인
-    if (Object.keys(input.cookStep).length) {
-      Object.keys(input.cookStep).map((keys) => {
-        if (input.cookStep[keys].description)
-          step = true;
-        else {
-          if (Object.keys(input.cookStep[keys].stepImage).length)
-          step = false;
-        }
-      })
-    }
-    
-    // 필수 요소 입력 확인
-    if (val && ing && step) setBtn(false);
-    else setBtn(true);
-  };
-
   const handleCancel = () => {
-    if(confirm("변경사항이 저장되지 않을 수 있습니다."))
-      router.push("/");
-  }
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm("변경사항이 저장되지 않을 수 있습니다.")) router.push("/");
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -640,7 +716,7 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     formData.append("content", input.content);
 
     // ingredients
-    let ingArr = [];
+    const ingArr = [];
     Object.values(input.ingredient).map((value) => {
       if (value.name && value.quantity) {
         ingArr.push(value);
@@ -652,32 +728,38 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
     Object.values(input.cookStep).map((value, idx) => {
       if (value.description) {
         formData.append("step_des", value.description);
-        if (value.stepImage)
-          formData.append(`img_${idx}`, value.stepImage);
+        if (value.stepImage) formData.append(`img_${idx}`, value.stepImage);
       }
     });
 
     // images
-    Object.values(input.images).map((value) => {
+    Object.values(input.images.images).map((value) => {
       formData.append("images", value);
-    })
-    
-    const url = method === "post" ? "/posts/post/" : `/posts/post/${postId}/`;
-    axiosWrapper(method, url, formData, (res) =>
-    {
-      if (res.status === 201) {
-        //router.push("/");
-        console.log("post created.");
+      if (value.name === input.images.thumbnail) {
+        formData.append("thumbnail", value);
       }
-    }, (err) => {
-      alert("오류가 발생했습니다." + err)
-      console.log("post create err: ", err)
     });
-    
+
+    const url = method === "post" ? "/posts/post/" : `/posts/post/${postId}/`;
+    axiosWrapper(
+      method,
+      url,
+      formData,
+      (res) => {
+        if (res.status === 201) {
+          router.push("/posts");
+        }
+      },
+      (err) => {
+        alert(`오류가 발생했습니다. ${err}`);
+        console.log("post create err: ", err);
+      },
+    );
+
     setLoading(false);
     return false;
-  }
-  
+  };
+
   return (
     <>
       <CommonLayout fix={1}>
@@ -692,7 +774,7 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
                 value={input.title}
                 height="35"
                 placeholder="예) 부침개 만들기"
-                maxLength= "50"
+                maxLength="50"
                 onChange={handleChange}
               />
             </ContLine>
@@ -711,39 +793,78 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
             </ContLine>
             <ContLine>
               <InputLabel fill={1}>레시피 정보</InputLabel>
-              <RecipeInfo>         
-                <InfoForm id="cook-portion" label="인원" name="cookPortion" value={input.cookPortion} select={COOK_PORTION_SELECT} func={handleChange}/>
-                <InfoForm id="cook-time" label="시간" name="cookTime" value={input.cookTime} select={COOK_TIME_SELECT} func={handleChange}/>
-                <InfoForm id="cook-degree" label="난이도" name="cookDegree" value={input.cookDegree} select={COOK_DEGREE_SELECT} func={handleChange}/>
+              <RecipeInfo>
+                <InfoForm
+                  id="cook-portion"
+                  label="인원"
+                  name="cookPortion"
+                  value={input.cookPortion}
+                  select={COOK_PORTION_SELECT}
+                  func={handleChange}
+                />
+                <InfoForm
+                  id="cook-time"
+                  label="시간"
+                  name="cookTime"
+                  value={input.cookTime}
+                  select={COOK_TIME_SELECT}
+                  func={handleChange}
+                />
+                <InfoForm
+                  id="cook-degree"
+                  label="난이도"
+                  name="cookDegree"
+                  value={input.cookDegree}
+                  select={COOK_DEGREE_SELECT}
+                  func={handleChange}
+                />
               </RecipeInfo>
-            </ContLine>     
+            </ContLine>
           </ContentBox>
           <ContentBox>
-            <ContLine style={{marginBottom: "55px"}}>
-            <InputLabel fill={1} style={{marginBottom: "auto", marginTop: "6px"}}>재료</InputLabel>
-              <IngList ingState={ingState} handleMainChange={handleMainChange}/> 
+            <ContLine style={{ marginBottom: "55px" }}>
+              <InputLabel
+                fill={1}
+                style={{ marginBottom: "auto", marginTop: "6px" }}
+              >
+                재료
+              </InputLabel>
+              <IngList
+                ingState={ingState}
+                handleMainChange={handleMainChange}
+              />
             </ContLine>
           </ContentBox>
           <ContentBox>
             <ContLine>
-            <StepWrapper>
-              <InputLabel fill={1}>레시피 순서</InputLabel>
-              <StepInfo>
-                <CreateIcon color="action" fontSize="small" style={{marginRight: "9px"}} />
-                당신의 레시피를 소개해주세요!<br />
-                조리 사진을 첨부하여 더욱 근사한 레시피를 완성해보세요.
-              </StepInfo>
-              <CookStepBox>
-                <CookStepItem>
-                  <StepList stepState={stepState} handleMainChange={handleMainChange}/>
-                </CookStepItem>
-              </CookStepBox>
-            </StepWrapper>
+              <StepWrapper>
+                <InputLabel fill={1}>레시피 순서</InputLabel>
+                <StepInfo>
+                  <CreateIcon
+                    color="action"
+                    fontSize="small"
+                    style={{ marginRight: "9px" }}
+                  />
+                  당신의 레시피를 소개해주세요!
+                  <br />
+                  조리 사진을 첨부하여 더욱 근사한 레시피를 완성해보세요.
+                </StepInfo>
+                <CookStepBox>
+                  <CookStepItem>
+                    <StepList
+                      stepState={stepState}
+                      handleMainChange={handleMainChange}
+                    />
+                  </CookStepItem>
+                </CookStepBox>
+              </StepWrapper>
             </ContLine>
           </ContentBox>
           <ContentBox>
             <ContLine>
-              <InputLabel style={{marginBottom: "auto"}}>완성 사진</InputLabel>
+              <InputLabel style={{ marginBottom: "auto" }}>
+                완성 사진
+              </InputLabel>
               <ImagesContainer>
                 <Images state={input} setState={setInput} />
               </ImagesContainer>
@@ -765,12 +886,23 @@ export default function Recipe({ingState, stepState, inputState, method, postId}
           </ContentBox>
           <BtnBox>
             <div>
-              <ButtonWrapper disable={btn} type="submit" loading={isLoading? "indeterminate" : null} size="large" text="저장"/>
-              <ButtonWrapper handleOnClick={handleCancel} type="button" size="large" text="취소"/>
+              <ButtonWrapper
+                disable={btn}
+                type="submit"
+                loading={isLoading ? "indeterminate" : null}
+                size="large"
+                text="저장"
+              />
+              <ButtonWrapper
+                handleOnClick={handleCancel}
+                type="button"
+                size="large"
+                text="취소"
+              />
             </div>
-          </BtnBox>            
+          </BtnBox>
         </PostContainer>
       </CommonLayout>
     </>
-  )
+  );
 }

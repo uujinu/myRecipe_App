@@ -1,3 +1,5 @@
+/* eslint-disable no-sequences */
+/* eslint-disable no-use-before-define */
 import { useState } from "react";
 import axios from "axios";
 import styled from "styled-components";
@@ -13,7 +15,6 @@ import { getUserInfo } from "@slice/user";
 import { selectLogin } from "@slice/login";
 import { IconButton } from "@material-ui/core";
 
-
 const CloseBtn = styled.div`
   position: absolute;
   right: 0;
@@ -23,7 +24,7 @@ const CloseBtn = styled.div`
 const ResendForm = styled.div`
   width: 100%;
   position: relative;
-  display: ${(props) => props.resend ? "" : "none"};
+  display: ${(props) => (props.resend ? "" : "none")};
 `;
 
 const InfoBox = styled.div`
@@ -47,39 +48,51 @@ const MessageBox = styled.div`
 function Resend(props) {
   const { choice } = props;
   const initial = {
-    email: ""
+    email: "",
   };
   const [values, setvalues] = useState(initial);
-  
+
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData();
-    formData.append("email", values.email)
+    formData.append("email", values.email);
     if (choice === "verify")
       axios.post("http://localhost:8000/accounts/send-email/", formData);
     else axios.post("http://localhost:8000/accounts/password/reset/", formData);
     setvalues(initial);
     alert("이메일이 전송되었습니다.");
-  }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setvalues({
       ...values,
-      [name]: value
+      [name]: value,
     });
-  }
+  };
 
   return (
     <>
       <MessageBox>안내문을 수신할 이메일을 입력하세요.</MessageBox>
       <form onSubmit={handleOnSubmit}>
-        <TextFieldWrapper required color="secondary" name="email" value={values.email} id="re-email" label="이메일" onChange={handleInputChange}/>
-        <ButtonWrapper type="submit" text={"확인"} style={{"marginTop": "5px", "width": "100%"}} />
+        <TextFieldWrapper
+          required
+          color="secondary"
+          name="email"
+          value={values.email}
+          id="re-email"
+          label="이메일"
+          onChange={handleInputChange}
+        />
+        <ButtonWrapper
+          type="submit"
+          text="확인"
+          style={{ marginTop: "5px", width: "100%" }}
+        />
       </form>
     </>
-  )
+  );
 }
 
 export default function LoginForm() {
@@ -91,10 +104,10 @@ export default function LoginForm() {
 
   const initialFValues = {
     email: "",
-    password: ""
+    password: "",
   };
 
-  const handleOnSubmit = e => {
+  const handleOnSubmit = (e) => {
     e.preventDefault();
 
     dispatch(loginUser(values))
@@ -103,36 +116,74 @@ export default function LoginForm() {
         dispatch(getUserInfo(res));
         router.replace("/");
       })
-      .catch((e) => {
+      .catch(() => {
         alert("로그인에 실패하였습니다.");
-      })
-    resetForm(); 
-  }
+      });
+    resetForm();
+  };
 
-  const {
-    values,
-    handleInputChange,
-    resetForm
-  } = useForm(initialFValues, false, undefined);
+  const { values, handleInputChange, resetForm } = useForm(
+    initialFValues,
+    false,
+    undefined,
+  );
 
   return (
     <>
       <ResendForm resend={resend}>
         <Resend choice={choice} />
         <CloseBtn>
-          <IconButton size="small" disableRipple={true} onClick={()=>(setResend(!resend),setChoice(""))}>
+          <IconButton
+            size="small"
+            disableRipple
+            onClick={() => (setResend(!resend), setChoice(""))}
+          >
             <Close />
           </IconButton>
         </CloseBtn>
       </ResendForm>
       <Form onSubmit={handleOnSubmit}>
         <ResendForm resend={!resend}>
-        <TextFieldWrapper required color="secondary" name="email" value={values.email} id="email" label="이메일" onChange={handleInputChange}/>
-        <TextFieldWrapper required color="secondary" name="password" value={values.password} id="password" label="비밀번호" type="password" inputProps={{maxLength: 16}} onChange={handleInputChange}/>
-        <ButtonWrapper type="submit" text={"로그인"} style={{"marginTop": "5px", "width": "100%"}} loading={isLoading? "indeterminate" : null}/>
-        <InfoBox><Clickable onClick={()=>(setResend(!resend),setChoice("verify"))}>인증이메일 재전송</Clickable><Clickable onClick={()=>(setResend(!resend),setChoice("password"))}>비밀번호 변경</Clickable></InfoBox>
+          <TextFieldWrapper
+            required
+            color="secondary"
+            name="email"
+            value={values.email}
+            id="email"
+            label="이메일"
+            onChange={handleInputChange}
+          />
+          <TextFieldWrapper
+            required
+            color="secondary"
+            name="password"
+            value={values.password}
+            id="password"
+            label="비밀번호"
+            type="password"
+            inputProps={{ maxLength: 16 }}
+            onChange={handleInputChange}
+          />
+          <ButtonWrapper
+            type="submit"
+            text="로그인"
+            style={{ marginTop: "5px", width: "100%" }}
+            loading={isLoading ? "indeterminate" : null}
+          />
+          <InfoBox>
+            <Clickable
+              onClick={() => (setResend(!resend), setChoice("verify"))}
+            >
+              인증이메일 재전송
+            </Clickable>
+            <Clickable
+              onClick={() => (setResend(!resend), setChoice("password"))}
+            >
+              비밀번호 변경
+            </Clickable>
+          </InfoBox>
         </ResendForm>
       </Form>
     </>
-  )
+  );
 }

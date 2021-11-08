@@ -1,12 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { createSlice } from "@reduxjs/toolkit";
 import { signupUser } from "./thunk/auth";
-
 
 const initialState = {
   isLoading: false,
   status: "",
   error: "",
-}
+};
 
 const signupSlice = createSlice({
   name: "signup",
@@ -18,15 +18,15 @@ const signupSlice = createSlice({
     },
     [signupUser.fulfilled.type]: (state) => {
       state.isLoading = false;
-      state.status= "success";
+      state.status = "success";
       state.error = "";
     },
     [signupUser.rejected.type]: (state, action) => {
       state.isLoading = false;
-      state.status= "error"
+      state.status = "error";
       state.error = action.error.message;
     },
-  }
+  },
 });
 
 const { reducer, actions } = signupSlice;

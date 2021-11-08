@@ -33,16 +33,18 @@
     "react/jsx-filename-extension": 0,
     "react/jsx-one-expression-per-line": 0,
     "no-nested-ternary": 0,
+    "react/prop-types": 0,
     "react/jsx-props-no-spreading": ["off"],
     "no-param-reassign": ["error", { "props": false }],
     "no-console": "off",
-    "import/extensions": "never",
+    "no-alert": "off",
+    "import/extensions": "off",
     "no-restricted-syntax": [
-        "error",
-        {
-            "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(log|warn|error|info|trace)$/]",
-            "message": "Unexpected property on console object was called"
-        }
+      "error",
+      {
+          "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(log|warn|error|info|trace)$/]",
+          "message": "Unexpected property on console object was called"
+      }
     ],
     "prettier/prettier":
     [

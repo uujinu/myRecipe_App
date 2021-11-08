@@ -38,7 +38,6 @@ const Title = styled.div`
   margin-bottom: 10px;
 `;
 
-
 export default function Footer() {
   return (
     <>

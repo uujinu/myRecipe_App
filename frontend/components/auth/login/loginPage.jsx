@@ -3,13 +3,9 @@ import Link from "next/link";
 import Image from "next/image";
 import * as S from "../styles/style";
 
-
 export default function AuthPage(props) {
   const theme = useTheme();
-  const {
-    auth,
-    children
-  } = props;
+  const { auth, children } = props;
 
   return (
     <S.Container theme={theme}>
@@ -19,9 +15,7 @@ export default function AuthPage(props) {
         </Link>
 
         <S.AuthBoxWrapper>
-          <S.AuthBox>
-            {children}
-          </S.AuthBox>
+          <S.AuthBox>{children}</S.AuthBox>
         </S.AuthBoxWrapper>
         <S.BottomWrapper>
           <S.Visible auth={auth}>

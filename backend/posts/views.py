@@ -1,10 +1,14 @@
+import sys
 import json
+from PIL import Image
+from io import BytesIO
 from rest_framework import status
 from .models import *
 from .serializers import *
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class PostView(viewsets.ModelViewSet):
@@ -13,7 +17,7 @@ class PostView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action == 'list' or self.action == 'retrieve':
             return (AllowAny(),)
         return super().get_permissions()
 
@@ -23,6 +27,21 @@ class PostView(viewsets.ModelViewSet):
 
         if self.action == 'list':
             return PostListSerializer
+
+        if self.action == 'retrieve':
+            return PostDetailSerializer
+
+    def convert_test(self, img, w, h):
+        temp = Image.open(img).copy()
+        temp = temp.convert('RGB')
+        temp.thumbnail((w, h), Image.ANTIALIAS)
+        return self.image_to_bytes(temp)
+
+    def image_to_bytes(self, img):
+        res = BytesIO()
+        img.save(res, format='JPEG', quality=95)
+        res.seek(0)
+        return res
 
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
@@ -57,6 +76,16 @@ class PostView(viewsets.ModelViewSet):
                 for img in imgArr:
                     tempArr.append({'recipe_image': img})
                 request_data['images'] = tempArr
+
+            # thumbnail
+            if request_data['thumbnail'] == '':
+                request_data.pop('thumbnail')
+            else:
+                img = request_data['thumbnail']
+                converted = self.convert_test(img, 620, 500)
+                thumbnail = InMemoryUploadedFile(
+                    file=converted, field_name="ImageField", name=img.name, content_type='image/jpeg', size=sys.getsizeof(converted), charset=None)
+                request_data['thumbnail'] = thumbnail
 
             kwargs['data'] = request_data.dict()
 
