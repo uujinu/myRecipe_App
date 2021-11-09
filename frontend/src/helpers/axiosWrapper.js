@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-underscore-dangle */
 import axios from "axios";
 import router from "next/router";
@@ -36,7 +37,7 @@ export default function axiosWrapper(
           withCredentials: true,
         });
         return temp
-          .post("/token/refresh/", { user_id: userId })
+          .post("/token/refresh/", { "user_id": userId })
           .then((res) => {
             const newAccessToken = res.data.access;
             store.dispatch(refreshJWT(newAccessToken));
