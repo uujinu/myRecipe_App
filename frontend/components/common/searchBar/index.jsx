@@ -1,13 +1,20 @@
 import styled from "styled-components";
 import SearchIcon from "@material-ui/icons/Search";
+import { useState, useEffect } from "react";
+
+const Form = styled.form`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    width: 87%;
+  }
+`;
 
 const SearchWrapper = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
-    margin-top: 10px;
-    width: 87%;
+    margin-top: ${(props) => (props.margin ? "10" : "0")}px;
   }
   display: flex;
-  margin-top: 20px;
+  position: relative;
+  margin-top: ${(props) => (props.margin ? "20" : "0")}px;
 `;
 
 const SearchInput = styled.input`
@@ -35,22 +42,62 @@ const SearchButton = styled.div`
   }
 `;
 
-export default function SearchBar({ placeholder, cb }) {
+const SearchRes = styled.div`
+  margin-left: 10px;
+  background-color: #faf8f5;
+  position: absolute;
+  padding: 0 10px;
+  width: 480px;
+  max-height: 300px;
+  overflow: auto;
+  top: 38px;
+  line-height: 35px;
+  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+  z-index: 9999;
+  display: ${(props) => (props.display ? "block" : "none")};
+  & > div {
+    cursor: pointer;
+    &:hover {
+      background-color: #fad5c480;
+    }
+  }
+`;
+
+export default function SearchBar({ margin, width, placeholder, cb, data }) {
+  const [value, setValue] = useState("");
+  const [result, setResult] = useState([]);
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+
+  useEffect(() => {
+    const res = data.filter((val) => val.indexOf(value) !== -1);
+    setResult(res);
+  }, [value]);
+
   return (
-    <form onSubmit={handleSubmit}>
-      <SearchWrapper>
+    <Form onSubmit={handleSubmit}>
+      <SearchWrapper margin={margin || 0}>
         <SearchInput
+          width={width}
           type="text"
-          placeholder={placeholder || "레시피를 검색해보세요."}
-          onChange={(e) => cb(e.target.value)}
+          placeholder={placeholder || "레시피, 재료를 검색해보세요."}
+          onChange={(e) => {
+            cb(e.target.value);
+            setValue(e.target.value);
+          }}
         />
+        <SearchRes display={value && result.length}>
+          {result.map((res, idx) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={idx}>{res}</div>
+          ))}
+        </SearchRes>
         <SearchButton>
           <SearchIcon />
         </SearchButton>
       </SearchWrapper>
-    </form>
+    </Form>
   );
 }
