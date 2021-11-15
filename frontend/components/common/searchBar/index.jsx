@@ -67,19 +67,34 @@ const SearchRes = styled.div`
 export default function SearchBar({ margin, width, placeholder, cb, data }) {
   const [value, setValue] = useState("");
   const [result, setResult] = useState([]);
+  const [focus, setFocus] = useState(0);
   const handleSubmit = (e) => {
     e.preventDefault();
+  };
+
+  const handleFocus = (e) => {
+    if (e.target.id === "searchInput") setFocus(1);
+    else setFocus(0);
   };
 
   useEffect(() => {
     const res = data.filter((val) => val.indexOf(value) !== -1);
     setResult(res);
+    setFocus(1);
   }, [value]);
+
+  useEffect(() => {
+    window.addEventListener("click", handleFocus);
+    return () => {
+      window.removeEventListener("click", handleFocus);
+    };
+  }, []);
 
   return (
     <Form onSubmit={handleSubmit}>
       <SearchWrapper margin={margin || 0}>
         <SearchInput
+          id="searchInput"
           width={width}
           type="text"
           placeholder={placeholder || "레시피, 재료를 검색해보세요."}
@@ -88,7 +103,7 @@ export default function SearchBar({ margin, width, placeholder, cb, data }) {
             setValue(e.target.value);
           }}
         />
-        <SearchRes display={value && result.length}>
+        <SearchRes display={value && result.length && focus}>
           {result.map((res, idx) => (
             // eslint-disable-next-line react/no-array-index-key
             <div key={idx}>{res}</div>
