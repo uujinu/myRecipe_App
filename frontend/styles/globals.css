@@ -69,6 +69,21 @@
   box-sizing: border-box;
 }
 
+*::-webkit-scrollbar {
+  width: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #d1b7ab;
+  border-radius: 10px;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 10px;
+  box-shadow: inset 0px 0px 5px white;
+}
+
 html,
 body {
   padding: 0;
