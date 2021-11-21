@@ -77,15 +77,19 @@ export default function SearchBar({ margin, width, placeholder, cb, data }) {
     if (e.target.id === "searchInput") setFocus(1);
     else setFocus(0);
   };
+
   useEffect(async () => {
     const res = await axios.get("http://localhost:8000/posts/data/");
     setData(res.data.data);
   }, []);
 
-
   useEffect(() => {
-    const res = data.filter((val) => val.indexOf(value) !== -1);
-    setResult(res);
+    const ary = [];
+    data.map((val) => {
+      if (val.indexOf(value) !== -1) ary.push(val);
+    });
+
+    setResult(ary);
     setFocus(1);
   }, [value]);
 
