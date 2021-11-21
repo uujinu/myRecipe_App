@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@material-ui/core";
@@ -187,11 +187,6 @@ const SignUpBox = styled.div`
   }
 `;
 
-const SearchRes = styled.div`
-  background-color: #ffff;
-  height: 38px;
-`;
-
 function ItemBox({ recipeInfo }) {
   const [info, setInfo] = useState(recipeInfo);
 
@@ -239,12 +234,6 @@ function RecentWrapper({ recipeInfo, height }) {
 }
 
 export default function MainComponent({ list }) {
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    console.log("list: ", list);
-  });
-
   return (
     <>
       <MainContainer>
@@ -260,11 +249,7 @@ export default function MainComponent({ list }) {
           </TrandItem>
         </ContentBox>
         <Search>
-          <SearchBar
-            cb={(e) => {
-              setSearch(e);
-            }}
-          />
+          <SearchBar />
         </Search>
         <ContentBox>
           <TitleSection>
