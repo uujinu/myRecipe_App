@@ -155,3 +155,15 @@ def search(request):
                     temp.append(rcp[str(k['RECIPE_ID'])])
 
         return JsonResponse({'posts': json.dumps(data, ensure_ascii=False), 'rcps': json.dumps(temp, ensure_ascii=False)})
+
+
+def jsonData(request):
+    ing, rcp = getData()
+    ary = []
+    for i in ing:
+        if i['NEW_IRDNT_NM'] not in ary:
+            ary.append(i['NEW_IRDNT_NM'])
+    for i in rcp:
+        ary.append(i)
+
+    return JsonResponse({'data': ary})

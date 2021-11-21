@@ -7,4 +7,6 @@ router.register('post', PostView)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('search/', search, name='search-posts'),
+    path('data/', jsonData, name='json-data'),
 ]
