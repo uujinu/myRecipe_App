@@ -142,7 +142,7 @@ def search(request):
         # openapi
         ing, rcp = getData()
         ings = []
-        temp = []
+        temp = set()
 
         for i in ing:  # query 관련 재료
             if query in i['NEW_IRDNT_NM']:
@@ -151,10 +151,13 @@ def search(request):
             res = requests.get(os.environ.get(
                 'RECIPE_IRDNT') + f'/1/1000?IRDNT_NM={i}').json()['Grid_20150827000000000227_1']['row']
             for k in res:
-                if rcp.get(str(k['RECIPE_ID'])) and (rcp[str(k['RECIPE_ID'])] not in temp):
-                    temp.append(rcp[str(k['RECIPE_ID'])])
+                if rcp.get(str(k['RECIPE_ID'])):
+                    temp.add(rcp[str(k['RECIPE_ID'])])
+        for i in rcp:
+            if query in rcp[i]:
+                temp.add(rcp[i])
 
-        return JsonResponse({'posts': json.dumps(data, ensure_ascii=False), 'rcps': json.dumps(temp, ensure_ascii=False)})
+        return JsonResponse({'posts': json.dumps(data, ensure_ascii=False), 'rcps': json.dumps(list(temp), ensure_ascii=False)})
 
 
 def jsonData(request):
