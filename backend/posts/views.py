@@ -103,3 +103,19 @@ class CommentView(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (AllowAny,)
+
+
+def getData():  # json 데이터 로드
+    dir = os.path.dirname(os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))))
+    ingridient = os.path.join(dir, 'ingredients.json')
+    recipe = os.path.join(dir, 'recipe.json')
+
+    with open(ingridient, 'r', encoding='UTF8') as json_file:
+        ing = json.load(json_file)
+    with open(recipe, 'r', encoding='UTF8') as json_file:
+        rcp = json.load(json_file)
+
+    return ing, rcp
+
+
