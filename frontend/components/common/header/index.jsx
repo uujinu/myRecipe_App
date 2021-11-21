@@ -85,17 +85,20 @@ const ScrollTracker = () => {
     onScroll();
     return () => {
       window.removeEventListener("scroll", throttleScroll);
+      setScrollY(-1);
     };
   }, []);
 
   useEffect(() => {
+    if (scrollY !== -1) {
     const deltaY = scrollY - pageY;
     if (deltaY === 0) return;
     if (scrollY === 0 || deltaY < 0) {
       setHide(false);
     } else setHide(true);
     setPageY(scrollY);
-  });
+    }
+  }, [scrollY]);
 
   return { scrollY, hide };
 };
