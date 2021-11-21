@@ -1,7 +1,9 @@
+import os
 import sys
 import json
 from PIL import Image
 from io import BytesIO
+from django.http.response import JsonResponse
 from rest_framework import status
 from .models import *
 from .serializers import *
@@ -9,6 +11,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.files.uploadedfile import InMemoryUploadedFile
+import requests
 
 
 class PostView(viewsets.ModelViewSet):
@@ -119,3 +122,36 @@ def getData():  # json 데이터 로드
     return ing, rcp
 
 
+# query 관련 레시피 정보 응답
+def search(request):
+    query = request.GET['q']
+    if query:
+        set_temp = set()
+        posts = Post.objects.filter(
+            title__contains=query)  # 제목에 query가 포함된 post
+        ings = Ingredient.objects.filter(name__contains=query)  # query와 관련된 재료
+        for i in posts:
+            set_temp.add(i.id)
+        for i in ings:
+            set_temp.add(i.post_id)
+
+        # query 관련 post 데이터
+        data = PostListSerializer(instance=Post.objects.filter(
+            id__in=set_temp), many=True).data
+
+        # openapi
+        ing, rcp = getData()
+        ings = []
+        temp = []
+
+        for i in ing:  # query 관련 재료
+            if query in i['NEW_IRDNT_NM']:
+                ings.append(i['IRDNT_NM'])
+        for i in ings:  # 해당 재료가 들어가는 모든 레시피 ID
+            res = requests.get(os.environ.get(
+                'RECIPE_IRDNT') + f'/1/1000?IRDNT_NM={i}').json()['Grid_20150827000000000227_1']['row']
+            for k in res:
+                if rcp.get(str(k['RECIPE_ID'])) and (rcp[str(k['RECIPE_ID'])] not in temp):
+                    temp.append(rcp[str(k['RECIPE_ID'])])
+
+        return JsonResponse({'posts': json.dumps(data, ensure_ascii=False), 'rcps': json.dumps(temp, ensure_ascii=False)})
