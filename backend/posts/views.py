@@ -159,11 +159,10 @@ def search(request):
 
 def jsonData(request):
     ing, rcp = getData()
-    ary = []
+    ary = set()
     for i in ing:
         if i['NEW_IRDNT_NM'] not in ary:
-            ary.append(i['NEW_IRDNT_NM'])
+            ary.add(i['NEW_IRDNT_NM'])
     for i in rcp:
-        ary.append(i)
-
-    return JsonResponse({'data': ary})
+        ary.add(rcp[i])
+    return JsonResponse({'data': list(ary)})
