@@ -1,13 +1,12 @@
+/* eslint-disable array-callback-return */
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import router from "next/router";
 import { Button } from "@material-ui/core";
 import SearchBar from "../common/searchBar";
-import axiosWrapper from "../../src/helpers/axiosWrapper";
 
 const MainContainer = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
@@ -239,8 +238,12 @@ function RecentWrapper({ recipeInfo, height }) {
   );
 }
 
-export default function MainComponent({ list, recipe }) {
+export default function MainComponent({ list }) {
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    console.log("list: ", list);
+  });
 
   return (
     <>
@@ -261,7 +264,6 @@ export default function MainComponent({ list, recipe }) {
             cb={(e) => {
               setSearch(e);
             }}
-            data={recipe}
           />
         </Search>
         <ContentBox>
