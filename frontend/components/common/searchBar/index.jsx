@@ -68,6 +68,7 @@ export default function SearchBar({ margin, width, placeholder, cb, data }) {
   const [value, setValue] = useState("");
   const [result, setResult] = useState([]);
   const [focus, setFocus] = useState(0);
+  const [data, setData] = useState([]);
   const handleSubmit = (e) => {
     e.preventDefault();
   };
@@ -76,6 +77,11 @@ export default function SearchBar({ margin, width, placeholder, cb, data }) {
     if (e.target.id === "searchInput") setFocus(1);
     else setFocus(0);
   };
+  useEffect(async () => {
+    const res = await axios.get("http://localhost:8000/posts/data/");
+    setData(res.data.data);
+  }, []);
+
 
   useEffect(() => {
     const res = data.filter((val) => val.indexOf(value) !== -1);
