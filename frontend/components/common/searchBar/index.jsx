@@ -1,6 +1,13 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable array-callback-return */
+/* eslint-disable no-unused-vars */
 import styled from "styled-components";
 import SearchIcon from "@material-ui/icons/Search";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import router from "next/router";
 
 const Form = styled.form`
   ${(props) => props.theme.breakpoints.down("sm")} {
@@ -32,7 +39,7 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchButton = styled.div`
+const SearchButton = styled.button`
   height: 40px;
   cursor: pointer;
   display: contents;
@@ -64,13 +71,17 @@ const SearchRes = styled.div`
   }
 `;
 
-export default function SearchBar({ margin, width, placeholder, cb, data }) {
+export default function SearchBar({ margin, width, placeholder }) {
   const [value, setValue] = useState("");
   const [result, setResult] = useState([]);
   const [focus, setFocus] = useState(0);
   const [data, setData] = useState([]);
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    if (!value) alert("검색어를 입력하세요.");
+    else {
+      const url = `/posts/search?q=${encodeURIComponent(value)}`;
+      router.push(url);
+    }
   };
 
   const handleFocus = (e) => {
@@ -109,17 +120,23 @@ export default function SearchBar({ margin, width, placeholder, cb, data }) {
           type="text"
           placeholder={placeholder || "레시피, 재료를 검색해보세요."}
           onChange={(e) => {
-            cb(e.target.value);
             setValue(e.target.value);
           }}
+          autoComplete="off"
         />
         <SearchRes display={value && result.length && focus}>
           {result.map((res, idx) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <div key={idx}>{res}</div>
+            <div
+              key={idx}
+              onClick={() => {
+                router.push(`/posts/search?q=${encodeURIComponent(res)}`);
+              }}
+            >
+              {res}
+            </div>
           ))}
         </SearchRes>
-        <SearchButton>
+        <SearchButton type="submit">
           <SearchIcon />
         </SearchButton>
       </SearchWrapper>
