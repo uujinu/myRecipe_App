@@ -10,6 +10,7 @@ import Head from "next/head";
 import "../styles/globals.css";
 import { PersistGate } from "redux-persist/integration/react";
 import { useStore } from "react-redux";
+import ProgressBar from "@components/common/progressBar";
 import theme from "../styles/theme";
 import { wrapper } from "../redux/store";
 
@@ -45,6 +46,7 @@ function MyApp(props) {
               persistor={store.__persistor}
               loading={<div>loading...</div>}
             >
+              <ProgressBar />
               <Component {...pageProps} />
             </PersistGate>
           </MuiThemeProvider>
