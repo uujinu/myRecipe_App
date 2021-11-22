@@ -71,16 +71,16 @@ const SearchRes = styled.div`
   }
 `;
 
-export default function SearchBar({ margin, width, placeholder }) {
-  const [value, setValue] = useState("");
+export default function SearchBar({ margin, width, placeholder, searchVal }) {
+  const [value, setValue] = useState(searchVal || "");
   const [result, setResult] = useState([]);
   const [focus, setFocus] = useState(0);
   const [data, setData] = useState([]);
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (!value) alert("검색어를 입력하세요.");
     else {
-      const url = `/posts/search?q=${encodeURIComponent(value)}`;
-      router.push(url);
+      router.push(`/posts/search?q=${encodeURIComponent(value)}`);
     }
   };
 
@@ -122,14 +122,16 @@ export default function SearchBar({ margin, width, placeholder }) {
           onChange={(e) => {
             setValue(e.target.value);
           }}
+          value={value}
           autoComplete="off"
         />
         <SearchRes display={value && result.length && focus}>
           {result.map((res, idx) => (
             <div
               key={idx}
-              onClick={() => {
-                router.push(`/posts/search?q=${encodeURIComponent(res)}`);
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/posts/search?q=${encodeURIComponent(value)}`);
               }}
             >
               {res}
