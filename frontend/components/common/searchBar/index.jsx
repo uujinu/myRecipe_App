@@ -131,7 +131,8 @@ export default function SearchBar({ margin, width, placeholder, searchVal }) {
               key={idx}
               onClick={(e) => {
                 e.preventDefault();
-                router.push(`/posts/search?q=${encodeURIComponent(value)}`);
+                setValue(res);
+                router.push(`/posts/search?q=${encodeURIComponent(res)}`);
               }}
             >
               {res}
