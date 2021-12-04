@@ -208,7 +208,7 @@ export default function SearchPage({ posts }) {
                 <PostWrapper>
                   <PostList>
                     {Object.values(recipe).map((val) => (
-                      <PostCard key={val.title}>
+                      <PostCard key={`${val.id}_${val.title}`}>
                         <Link
                           href={
                             val.id
@@ -227,7 +227,11 @@ export default function SearchPage({ posts }) {
                               }}
                             >
                               <Image
-                                src={val.url || val.thumbnail}
+                                src={
+                                  val.url ||
+                                  val.thumbnail ||
+                                  "/myrecipe_logo.png"
+                                }
                                 alt="img"
                                 layout="fill"
                                 objectFit="cover"
