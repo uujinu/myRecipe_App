@@ -167,6 +167,7 @@ const ViewMore = styled.div`
 const SignUpBox = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
     padding: 40px 12px;
+    margin: 0;
 
     & > a {
       width: 40%;
@@ -181,6 +182,7 @@ const SignUpBox = styled.div`
   justify-content: space-between;
   padding: 40px 80px;
   align-items: center;
+  margin: 50px 0 100px;
 
   & > h3 {
     font-family: Noto Sans CJK KR;
