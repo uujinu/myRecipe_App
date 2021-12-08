@@ -350,10 +350,10 @@ export default function RecipeDetail({ recipe }) {
                   </StepDiv>
                 ))}
               {!recipe[0].author &&
-                Object.values(recipe[1]).map((val) => (
-                  <StepDiv key={val.COOKING_NO}>
+                Object.values(recipe[1]).map((val, idx) => (
+                  <StepDiv key={`${val.COOKING_NO}_${val.ROW_NUM}`}>
                     <StepDDiv>
-                      <StepNum>{val.COOKING_NO}</StepNum>
+                      <StepNum>{idx + 1}</StepNum>
                       <StepDes>
                         {val.COOKING_DC}
                         {val.STEP_TIP && (
@@ -426,8 +426,15 @@ export async function getServerSideProps(ctx) {
     ]);
     res[0].data.Grid_20150827000000000226_1.row[0].INGREDIENT =
       res[1].data.Grid_20150827000000000227_1.row;
+    // 정렬
+    const sorted = res[2].data.Grid_20150827000000000228_1.row.sort(
+      function comp(a, b) {
+        return a.COOKING_NO - b.COOKING_NO;
+      },
+    );
+
     temp.push(res[0].data.Grid_20150827000000000226_1.row[0]);
-    temp.push(res[2].data.Grid_20150827000000000228_1.row);
+    temp.push(sorted);
   } else {
     const ress = await axios.get(
       `http://localhost:8000/posts/post/${ctx.query.id}`,
