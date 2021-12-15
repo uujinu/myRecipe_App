@@ -90,7 +90,7 @@ class User(AbstractUser):
 
 class Following(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='following')
+        User, on_delete=models.CASCADE, related_name='followings')
     following_user = models.ForeignKey(
         User, related_name='followers', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
