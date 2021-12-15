@@ -122,6 +122,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
         repr['images'] = RecipeImageSerializer(instance.images, many=True).data
         repr['ingredients'] = IngredientSerializer(
             instance.ingredients, many=True).data
+        repr['cookInfo'] = {
+            'cookDegree': instance.get_cook_degree_display(),
+            'cookPortion': instance.get_cook_portion_display(),
+            'cookTime': instance.get_cook_time_display()
+        }
 
         try:
             repr['comments'] = CommentSerializer(
@@ -133,5 +138,5 @@ class PostDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['title', 'thumbnail', 'total_likes', 'score_average',
-                  'total_comments', 'total_bookmarks']
+                  'total_comments', 'total_bookmarks', 'description', 'content']
         read_only_fields = ['title', 'thumbnail']
