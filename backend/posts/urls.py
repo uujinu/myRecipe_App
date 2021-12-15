@@ -9,4 +9,10 @@ urlpatterns = [
     path('', include(router.urls)),
     path('search/', search, name='search-posts'),
     path('data/', jsonData, name='json-data'),
+
+    path('like/', like, name='like-list'),
+    path('like/<int:post_id>/', like, name='like-setting'),
+
+    path('bookmark/', bookmark, name='bookmark-list'),
+    path('bookmark/<int:post_id>/', bookmark, name='bookmark-setting'),
 ]

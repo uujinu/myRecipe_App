@@ -5,6 +5,8 @@ from PIL import Image
 from io import BytesIO
 from django.http.response import JsonResponse
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from accounts.models import User
 from .models import *
 from .serializers import *
 from rest_framework import viewsets
@@ -127,10 +129,10 @@ def search(request):
     query = request.GET['q']
     if query:
         set_temp = set()
-        posts = Post.objects.filter(
+        post_list = Post.objects.filter(
             title__contains=query)  # 제목에 query가 포함된 post
         ings = Ingredient.objects.filter(name__contains=query)  # query와 관련된 재료
-        for i in posts:
+        for i in post_list:
             set_temp.add(i.id)
         for i in ings:
             set_temp.add(i.post_id)
@@ -169,3 +171,45 @@ def jsonData(request):
     for i in rcp:
         ary.add(rcp[i])
     return JsonResponse({'data': list(ary)})
+
+
+@api_view(['get', 'post', 'delete'])
+@permission_classes((IsAuthenticated,))
+def like(request, post_id=None):
+    if request.method == 'GET':  # 사용자 좋아요 리스트
+        like_list = User.objects.get(id=request.user.id).like_posts.all()
+        return Response(PostListSerializer(like_list, many=True).data, status=status.HTTP_200_OK)
+    else:  # 좋아요 생성/삭제
+        if post_id is None:
+            return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+        try:
+            post = Post.objects.get(id=post_id)
+            if post.likes.filter(id=request.user.id).exists():
+                post.likes.remove(request.user)
+                return Response('좋아요가 취소되었습니다.', status=status.HTTP_200_OK)
+            else:
+                post.likes.add(request.user)
+                return Response('좋아요가 추가되었습니다.', status=status.HTTP_200_OK)
+        except:
+            return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['get', 'post', 'delete'])
+@permission_classes((IsAuthenticated,))
+def bookmark(request, post_id=None):
+    if request.method == 'GET':  # 사용자 북마크 리스트
+        mark_list = User.objects.get(id=request.user.id).bookmarks.all()
+        return Response(PostListSerializer(mark_list, many=True).data, status=status.HTTP_200_OK)
+    else:  # 북마크 생성/삭제
+        if post_id is None:
+            return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+        try:
+            post = Post.objects.get(id=post_id)
+            if post.bookmarks.filter(id=request.user.id).exists():
+                post.bookmarks.remove(request.user)
+                return Response('북마크가 취소되었습니다.', status=status.HTTP_200_OK)
+            else:
+                post.bookmarks.add(request.user)
+                return Response('북마크가 추가되었습니다.', status=status.HTTP_200_OK)
+        except:
+            return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
