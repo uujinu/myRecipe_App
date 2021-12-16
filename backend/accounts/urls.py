@@ -22,6 +22,6 @@ urlpatterns = [
          NaverSignInCallBackView.as_view(), name='naver_callback'),
     path('naver/login/', NaverLogin.as_view(), name='naver_login_finish'),
 
-    path('bookmark/', bookmark, name='bookmark-list'),
-    path('bookmark/<int:post_id>/', bookmark, name='bookmark-setting'),
+    path('following/', following, name='following'),
+    path('following/<int:user_id>/', following, name='following'),
 ]

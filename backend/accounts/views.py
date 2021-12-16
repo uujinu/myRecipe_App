@@ -173,14 +173,25 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 @api_view(['get', 'post', 'delete'])
 @permission_classes((IsAuthenticated,))
-def bookmark(request, post_id=None):
-    if request.method == 'GET':  # 사용자 북마크 리스트
-        data = BookMarkSerializer(request.user).data
-        return Response(data, status=status.HTTP_200_OK)
-    else:  # 북마크 생성/삭제
-        post = get_object_or_404(Post, pk=post_id)
-        if post.bookmarks.filter(id=request.user.id).exists():
-            post.bookmarks.remove(request.user)
+def following(request, user_id=None):
+    if request.method == 'GET':  # 사용자 팔로잉 리스트
+        following_list = User.objects.filter(followers__user=request.user.id)
+        return Response(UserSerializer(following_list, many=True).data, status=status.HTTP_200_OK)
+
+    else:  # 팔로잉 생성/삭제
+        if user_id is None or user_id == request.user.id:
+            return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+        try:
+            following_user = User.objects.get(id=user_id)  # 먼저 팔로잉할 사람 있는지 검사
+            if Following.objects.filter(user=request.user, following_user=following_user).exists():  # 삭제
+                Following.objects.get(
+                    user=request.user, following_user=following_user).delete()
+                return Response('팔로우가 취소되었습니다.', status=status.HTTP_200_OK)
         else:
-            post.bookmarks.add(request.user)
-        return Response('success', status=status.HTTP_200_OK)
+                Following.objects.create(
+                    user=request.user, following_user=following_user)
+                return Response('팔로우가 추가되었습니다.', status=status.HTTP_200_OK)
+        except:
+            return Response('존재하지 않는 사용자입니다.', status=status.HTTP_404_NOT_FOUND)
+
+
