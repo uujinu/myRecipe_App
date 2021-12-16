@@ -5,7 +5,7 @@ from allauth.account.models import EmailAddress
 from dj_rest_auth.views import LoginView
 from django.contrib import messages
 from rest_framework.views import APIView
-from .models import User
+from .models import Following, User
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import *
@@ -21,7 +21,6 @@ from rest_framework_simplejwt.utils import datetime_from_epoch
 from dj_rest_auth.views import PasswordResetConfirmView
 from rest_framework.decorators import api_view, permission_classes
 from posts.models import Post
-from django.shortcuts import get_object_or_404
 
 
 class CustomLoginView(LoginView):
@@ -187,7 +186,7 @@ def following(request, user_id=None):
                 Following.objects.get(
                     user=request.user, following_user=following_user).delete()
                 return Response('팔로우가 취소되었습니다.', status=status.HTTP_200_OK)
-        else:
+            else:
                 Following.objects.create(
                     user=request.user, following_user=following_user)
                 return Response('팔로우가 추가되었습니다.', status=status.HTTP_200_OK)
@@ -195,3 +194,23 @@ def following(request, user_id=None):
             return Response('존재하지 않는 사용자입니다.', status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(['get'])
+@permission_classes((IsAuthenticated,))
+def info(request):
+    user_id = request.GET['user']
+    post_id = request.GET['post']
+    if user_id and post_id is None:
+        return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+
+    res = {}
+    if user_id is not None:
+        res['follow'] = Following.objects.filter(
+            user=request.user, following_user=user_id).exists()
+
+    if post_id is not None:
+        res['like'] = Post.objects.filter(
+            id=post_id, likes=request.user.id).exists()
+        res['bookmark'] = Post.objects.filter(
+            id=post_id, bookmarks=request.user.id).exists()
+
+    return Response({'response': res}, status=status.HTTP_200_OK)
