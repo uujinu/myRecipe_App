@@ -418,7 +418,7 @@ export default function RecipeDetail({ recipe }) {
               <S.Ings>
                 {recipe[0].author &&
                   Object.values(recipe[0].ingredients).map((val) => (
-                    <div key={val.name}>
+                    <div key={`${val.name}_${val.quantity}`}>
                       <li>
                         {val.name}
                         <span>{val.quantity}</span>
@@ -427,7 +427,7 @@ export default function RecipeDetail({ recipe }) {
                   ))}
                 {recipe[0].INGREDIENT &&
                   Object.values(recipe[0].INGREDIENT).map((val) => (
-                    <div key={val.IRDNT_NM}>
+                    <div key={`${val.IRDNT_NM}_${val.IRDNT_CPCTY}`}>
                       <li>
                         {val.IRDNT_NM}
                         <span>{val.IRDNT_CPCTY}</span>
