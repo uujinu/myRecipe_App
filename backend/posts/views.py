@@ -107,7 +107,30 @@ class PostView(viewsets.ModelViewSet):
 class CommentView(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return (AllowAny(),)
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        if kwargs['post_id'] is None:
+            return Response('잘못된 요청입니다.', status=status.HTTP_400_BAD_REQUEST)
+        request.data['post'] = kwargs['post_id']
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def list(self, request, *args, **kwargs):
+        if kwargs['post_id'] is None:
+            return Response('잘못된 요청입니다.', status=status.HTTP_400_BAD_REQUEST)
+        data = CommentSerializer(Post.objects.get(
+            id=kwargs['post_id']).comments.all(), many=True).data
+        return Response(data, status=status.HTTP_200_OK)
 
 
 def getData():  # json 데이터 로드

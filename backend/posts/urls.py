@@ -15,4 +15,9 @@ urlpatterns = [
 
     path('bookmark/', bookmark, name='bookmark-list'),
     path('bookmark/<int:post_id>/', bookmark, name='bookmark-setting'),
+
+    path('<int:post_id>/comment/',
+         CommentView.as_view({'post': 'create', 'get': 'list'}), name='comment-add'),
+    path('comment/<int:pk>/',
+         CommentView.as_view({'patch': 'partial_update', 'delete': 'destroy'}), name='comment-manage'),
 ]
