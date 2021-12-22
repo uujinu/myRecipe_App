@@ -6,17 +6,14 @@ from accounts.serializers import UserSerializer
 
 class CommentSerializer(serializers.ModelSerializer):
 
-    created_at = serializers.DateTimeField(format='%Y.%m.%d %H:%M')
-
     class Meta:
         model = Comment
         fields = '__all__'
-        #read_only_fields = ['author']
-        #exclude = ['id', 'author']
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
         repr['author'] = UserSerializer(instance.author).data
+        repr['created_at'] = instance.created_at.strftime('%Y.%m.%d %H:%M')
         return repr
 
 
