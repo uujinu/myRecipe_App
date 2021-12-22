@@ -1,242 +1,339 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-script-url */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import axios from "axios";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
+import { selectUser } from "@slice/user";
 import Image from "next/image";
 import Link from "next/link";
-import styled from "styled-components";
 import CommonLayout from "@components/layout/common";
 import ImageAvatar from "@components/common/avatar";
 import SliderComp from "@components/common/slider";
+import InfoBox, { SnackBar } from "@components/common/snackbar";
+import RatingStar from "@components/common/rating";
+import TopBtn from "@components/common/scrollTopBtn";
+import * as S from "@components/common/styles/postDetailStyle";
 import PeopleIcon from "@material-ui/icons/People";
 import TimerIcon from "@material-ui/icons/Timer";
+import { IconButton } from "@material-ui/core";
+import PersonIcon from "@material-ui/icons/Person";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import RestaurantMenuIcon from "@material-ui/icons/RestaurantMenu";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
+import TurnedInIcon from "@material-ui/icons/TurnedIn";
+import TurnedInNotIcon from "@material-ui/icons/TurnedInNot";
+import axiosWrapper from "../../src/helpers/axiosWrapper";
 
-const Container = styled.div`
-  max-width: 1980px;
-  min-height: 100vh;
-  width: 100%;
-  margin-top: 100px;
-`;
+function CommentWrapper({ comments, postId, userId, score }) {
+  const [comment, setComment] = useState([...comments]);
+  const [cmtInput, setCmtInput] = useState({
+    content: "",
+    rating: null,
+  });
+  const [edit, setEdit] = useState({
+    idx: null,
+    value: "",
+    rating: null,
+    manage: false,
+  });
 
-const Contents = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 0;
-  }
-  padding: 0 50px;
-`;
+  const handleEdit = (idx, value, rating) => {
+    setEdit({ idx, value, rating, manage: true });
+  };
 
-const TopSection = styled.div`
-  margin: 0 auto;
-  position: relative;
-  max-width: 600px;
-`;
+  const handleEditChange = (e) => {
+    setEdit({ ...edit, value: e.target.value });
+  };
 
-const ThumbNailBox = styled.div`
-  position: relative;
-  height: 400px;
-`;
-
-const UserInfo = styled.div`
-  position: absolute;
-  text-align: center;
-  width: 100%;
-  bottom: 35px;
-  & > div {
-    display: flex;
-    justify-content: center;
-  }
-  & > div > a > div {
-    width: 90px;
-    height: 90px;
-  }
-  & > span {
-    font-size: 11px;
-  }
-`;
-
-const RcpInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  & > div > div {
-    width: 90px;
-    height: 90px;
-  }
-  & > span {
-    font-size: 11px;
-  }
-`;
-
-const Summary = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 20px 10px;
-  }
-  padding-top: 50px;
-  font-size: 20px;
-
-  & > p {
-    color: #aaa;
-    font-size: 15px;
-    font-family: Noto Sans CJK KR;
-  }
-`;
-
-const CookInfoBox = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 20px 0 0 0;
-  }
-  display: flex;
-  justify-content: space-around;
-  color: #aaa;
-  padding: 20px 0 40px 0;
-  & > span {
-    display: flex;
-    flex-direction: column;
-    font-size: 13px;
-    text-align: center;
-    color: #bcb7b7;
-
-    & > .MuiSvgIcon-root {
-      width: 40px;
-      height: 40px;
+  const handleEditClick = (commentId) => {
+    if (edit.value === "") alert("내용을 입력하세요.");
+    else {
+      axiosWrapper(
+        "patch",
+        `/posts/comment/${commentId}/`,
+        { content: edit.value, rating: edit.rating },
+        () => {
+          comment[edit.idx].content = edit.value;
+          comment[edit.idx].rating = edit.rating;
+          setComment([...comment]);
+          setEdit({ idx: null, value: "", rating: null, manage: false });
+        },
+        () => {
+          alert("댓글 수정중 오류가 발생했습니다.");
+        },
+      );
     }
-  }
-`;
+  };
 
-const ContLine = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 50px 10px;
-  }
-  padding: 50px 75px;
-  margin: 20px auto;
-  border-top: 2px solid #e9e9e9;
-  max-width: 75rem;
-`;
-
-const ContTitle = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 20px 0;
-  }
-  font-size: 18px;
-  font-weight: bold;
-  padding: 20px 0 40px 0;
-
-  & > span {
-    color: #bcb7b7;
-    font-size: 11px;
-    font-weight: normal;
-    font-style: italic;
-  }
-`;
-
-const IngBox = styled.div``;
-
-const Ings = styled.ul`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    & > div {
-      width: 100% !important;
+  const handleRemove = (commentId, idx) => {
+    if (confirm("댓글을 삭제하시겠습니까?")) {
+      axiosWrapper(
+        "delete",
+        `/posts/comment/${commentId}/`,
+        undefined,
+        () => {
+          const newCmt = [
+            ...comment.slice(0, idx),
+            ...comment.slice(idx + 1, comment.length),
+          ];
+          setComment([...newCmt]);
+        },
+        () => {
+          alert("댓글 삭제중 오류가 발생했습니다.");
+        },
+      );
     }
-    & > div > li {
-      margin: 0 10px 10px 10px !important;
+  };
+
+  const handleChange = (e) => {
+    cmtInput.content = e.target.value;
+    setCmtInput({
+      ...cmtInput,
+    });
+  };
+
+  const handleComment = () => {
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+    } else if (cmtInput.content === "" && cmtInput.rating === null)
+      alert("내용을 입력하세요");
+    else {
+      axiosWrapper(
+        "post",
+        `/posts/${postId}/comment/`,
+        { ...cmtInput, author: userId },
+        (res) => {
+          setCmtInput({ content: "", rating: null });
+          const { data } = res;
+          setComment([data, ...comment]);
+        },
+        () => {
+          alert("오류가 발생했습니다.");
+        },
+      );
     }
-  }
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  };
 
-  & > div {
-    width: 41%;
-  }
-
-  & > div > li {
-    display: flex;
-    justify-content: space-between;
-    margin: 0 35px 10px 10px;
-    padding: 0 5px;
-    border-bottom: 1px solid #e2e2e2;
-    line-height: 23px;
-
-    & > span {
-      color: #938d8d;
-    }
-  }
-`;
-
-const Steps = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 0;
-  }
-  padding: 0 15px;
-
-  & > div {
-    min-height: 100px;
-    margin-bottom: 50px;
-  }
-`;
-
-const StepNum = styled.h2`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    font-size: 15px;
-    width: 25px;
-  }
-  color: #fafafa;
-  width: 33px;
-  background-color: #d1b7ab;
-  text-align: center;
-  padding-top: 5px;
-  margin-right: 10px;
-  height: fit-content;
-`;
-
-const StepDes = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    font-size: 15px;
-  }
-  padding: 0 10px;
-  word-break: break-all;
-  font-size: 18px;
-  width: 100%;
-`;
-
-const StepImg = styled.div`
-  position: relative;
-  height: 220px;
-  width: 100%;
-
-  & > div {
-    border-radius: 20px;
-    width: 300px;
-    margin: 0 0 0 auto !important;
-  }
-`;
-
-const StepDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const StepDDiv = styled.div`
-  display: flex;
-  margin-bottom: 10px;
-`;
-
-const CookImgs = styled.div``;
-
-const ImgItem = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    height: 300px;
-  }
-  position: relative;
-  height: 450px;
-`;
+  return (
+    <S.ContLine>
+      <S.StarDiv>
+        <span>
+          <RatingStar value={score} precision={0.1} readOnly />
+          <span style={{ fontSize: "15px", color: "#999" }}>{score}/5</span>
+        </span>
+      </S.StarDiv>
+      <S.ContTitle>
+        댓글 ({comment.length || 0}) <span>Comments</span>
+      </S.ContTitle>
+      {comment.length ? (
+        Object.values(comment).map((val, idx) => (
+          <div key={`${val.id}_${val.created_at}`}>
+            <S.CommentBox>
+              <S.CmtImg>
+                <Link href={`/profile/${val.author.pk}`} passHref>
+                  <a>
+                    <ImageAvatar
+                      name={val.author.nickname}
+                      image={val.author.profile_image || "/myrecipe_logo.png"}
+                    />
+                  </a>
+                </Link>
+              </S.CmtImg>
+              <S.CommentBody>
+                <div>
+                  <h4>
+                    <b>{val.author.nickname}</b>
+                    {val.created_at}
+                  </h4>
+                  {val.rating !== null && (
+                    <span>
+                      <RatingStar value={val.rating} precision={0.1} readOnly />
+                    </span>
+                  )}
+                </div>
+                {edit.manage && idx === edit.idx ? (
+                  <S.EditBox>
+                    <S.TextInput
+                      value={edit.value}
+                      onChange={handleEditChange}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "7px",
+                        right: "68px",
+                      }}
+                    >
+                      <span>
+                        <RatingStar
+                          value={edit.rating}
+                          precision={0.5}
+                          onChange={(e, newValue) => {
+                            edit.rating = newValue;
+                            setEdit({ ...edit });
+                          }}
+                        />
+                      </span>
+                    </div>
+                    <S.CommentBtn
+                      onClick={() => {
+                        handleEditClick(val.id);
+                      }}
+                    >
+                      등록
+                    </S.CommentBtn>
+                  </S.EditBox>
+                ) : (
+                  <p>{val.content}</p>
+                )}
+              </S.CommentBody>
+              {val.author.pk === userId && idx !== edit.idx && (
+                <S.CtrlBox>
+                  <S.CtrlBtn
+                    onClick={() => {
+                      handleEdit(idx, val.content, val.rating);
+                    }}
+                  >
+                    수정
+                  </S.CtrlBtn>
+                  <span style={{ color: "#ddd", padding: "0 3px" }}>|</span>
+                  <S.CtrlBtn
+                    onClick={() => {
+                      handleRemove(val.id, idx);
+                    }}
+                  >
+                    삭제
+                  </S.CtrlBtn>
+                </S.CtrlBox>
+              )}
+            </S.CommentBox>
+          </div>
+        ))
+      ) : (
+        <div>댓글을 남겨보세요!</div>
+      )}
+      <S.CommentWriteBox>
+        <div style={{ position: "relative", width: "100%" }}>
+          <S.TextInput value={cmtInput.content} onChange={handleChange} />
+          <div style={{ position: "absolute", bottom: "5px", right: "5px" }}>
+            <span>
+              <RatingStar
+                value={cmtInput.rating}
+                precision={0.5}
+                onChange={(e, newValue) => {
+                  cmtInput.rating = newValue;
+                  setCmtInput({ ...cmtInput });
+                }}
+              />
+            </span>
+          </div>
+        </div>
+        <S.CommentBtn onClick={handleComment}>등록</S.CommentBtn>
+      </S.CommentWriteBox>
+    </S.ContLine>
+  );
+}
 
 export default function RecipeDetail({ recipe }) {
+  const { user } = useSelector(selectUser);
+  const [state, setState] = useState({
+    follow: false,
+    like: false,
+    bookmark: false,
+  });
+  const [msg, setMsg] = useState("");
+  const router = useRouter();
+  const { id, nm } = router.query;
+  const { open, handleOpen, handleClose } = SnackBar();
+
+  useEffect(() => {
+    if (user.pk && !nm) {
+      axiosWrapper(
+        "get",
+        `/accounts/info/?user=${recipe[0].author.pk}&post=${id}`,
+        undefined,
+        (res) => {
+          setState({ ...res.data.response });
+        },
+        (err) => {
+          console.log("err: ", err);
+        },
+      );
+    }
+  }, []);
+
+  const handleFollowing = () => {
+    if (!user.pk) alert("로그인이 필요합니다.");
+    else {
+      axiosWrapper(
+        "post",
+        `/accounts/following/${recipe[0].author.pk}/`,
+        undefined,
+        () => {
+          state.follow = !state.follow;
+          setMsg(
+            state.follow ? "팔로우되었습니다." : "팔로우가 취소되었습니다.",
+          );
+          setState({ ...state });
+          handleOpen();
+        },
+        () => {
+          alert("오류가 발생했습니다.");
+        },
+      );
+    }
+  };
+
+  const handleLike = () => {
+    if (!user.pk) alert("로그인이 필요합니다.");
+    else {
+      axiosWrapper(
+        "post",
+        `/posts/like/${id}/`,
+        undefined,
+        (res) => {
+          state.like = !state.like;
+          setMsg(res.data);
+          setState({ ...state });
+          handleOpen();
+        },
+        () => {
+          alert("오류가 발생했습니다.");
+        },
+      );
+    }
+  };
+
+  const handleMark = () => {
+    if (!user.pk) alert("로그인이 필요합니다.");
+    else {
+      axiosWrapper(
+        "post",
+        `/posts/bookmark/${id}/`,
+        undefined,
+        (res) => {
+          state.bookmark = !state.bookmark;
+          setMsg(res.data);
+          setState({ ...state });
+          handleOpen();
+        },
+        () => {
+          alert("오류가 발생했습니다.");
+        },
+      );
+    }
+  };
+
   return (
     <CommonLayout fix={0}>
-      <Container>
-        <Contents>
-          <TopSection>
+      <S.Container>
+        <S.Contents>
+          <S.TopSection>
             <div style={{ position: "relative", padding: "20px 0 100px 0" }}>
-              <ThumbNailBox>
+              <S.ThumbNailBox>
                 <Image
                   src={
                     recipe[0].IMG_URL ||
@@ -247,8 +344,8 @@ export default function RecipeDetail({ recipe }) {
                   layout="fill"
                   objectFit="cover"
                 />
-              </ThumbNailBox>
-              <UserInfo>
+              </S.ThumbNailBox>
+              <S.UserInfo>
                 {recipe[0].author && (
                   <>
                     <div>
@@ -264,24 +361,39 @@ export default function RecipeDetail({ recipe }) {
                         </a>
                       </Link>
                     </div>
-                    <span>{recipe[0].author.nickname}</span>
+                    <span>{recipe[0].author.nickname} </span>
+                    {recipe[0].author.pk !== user.pk && (
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        style={{
+                          borderRadius: "5px",
+                          marginLeft: "3px",
+                          position: "absolute",
+                          bottom: "-3px",
+                        }}
+                        onClick={handleFollowing}
+                      >
+                        {state.follow ? <PersonIcon /> : <PersonAddIcon />}
+                      </IconButton>
+                    )}
                   </>
                 )}
                 {!recipe[0].author && (
-                  <RcpInfo>
+                  <S.RcpInfo>
                     <div>
                       <ImageAvatar name="MyRecipe" image="/myrecipe_logo.png" />
                     </div>
                     <span>MyRecipe</span>
-                  </RcpInfo>
+                  </S.RcpInfo>
                 )}
-              </UserInfo>
+              </S.UserInfo>
             </div>
-            <Summary>
+            <S.Summary>
               <>
                 <h3>{recipe[0].title || recipe[0].RECIPE_NM_KO}</h3>
                 <p>{recipe[0].description || recipe[0].SUMRY}</p>
-                <CookInfoBox>
+                <S.CookInfoBox>
                   <span>
                     <PeopleIcon />
                     {recipe[0].QNT || recipe[0].cookInfo.cookPortion}
@@ -294,16 +406,16 @@ export default function RecipeDetail({ recipe }) {
                     <RestaurantMenuIcon />
                     {recipe[0].LEVEL_NM || recipe[0].cookInfo.cookDegree}
                   </span>
-                </CookInfoBox>
+                </S.CookInfoBox>
               </>
-            </Summary>
-          </TopSection>
-          <ContLine>
-            <ContTitle>
+            </S.Summary>
+          </S.TopSection>
+          <S.ContLine>
+            <S.ContTitle>
               재료 <span>Ingredients</span>
-            </ContTitle>
-            <IngBox>
-              <Ings>
+            </S.ContTitle>
+            <S.IngBox>
+              <S.Ings>
                 {recipe[0].author &&
                   Object.values(recipe[0].ingredients).map((val) => (
                     <div key={val.name}>
@@ -322,39 +434,39 @@ export default function RecipeDetail({ recipe }) {
                       </li>
                     </div>
                   ))}
-              </Ings>
-            </IngBox>
-          </ContLine>
-          <ContLine style={{ paddingBottom: 0 }}>
-            <ContTitle>
+              </S.Ings>
+            </S.IngBox>
+          </S.ContLine>
+          <S.ContLine style={{ paddingBottom: 0 }}>
+            <S.ContTitle>
               조리순서 <span>Steps</span>
-            </ContTitle>
-            <Steps>
+            </S.ContTitle>
+            <S.Steps>
               {recipe[0].author &&
                 Object.values(recipe[0].cooksteps).map((val) => (
-                  <StepDiv key={`${val.step_id}_${recipe[0].title}`}>
-                    <StepDDiv>
-                      <StepNum>{val.step_id}</StepNum>
-                      <StepDes>{val.description}</StepDes>
-                    </StepDDiv>
+                  <S.StepDiv key={`${val.step_id}_${recipe[0].title}`}>
+                    <S.StepDDiv>
+                      <S.StepNum>{val.step_id}</S.StepNum>
+                      <S.StepDes>{val.description}</S.StepDes>
+                    </S.StepDDiv>
                     {val.step_image && (
-                      <StepImg>
+                      <S.StepImg>
                         <Image
                           src={val.step_image}
                           alt="img"
                           layout="fill"
                           objectFit="cover"
                         />
-                      </StepImg>
+                      </S.StepImg>
                     )}
-                  </StepDiv>
+                  </S.StepDiv>
                 ))}
               {!recipe[0].author &&
                 Object.values(recipe[1]).map((val, idx) => (
-                  <StepDiv key={`${val.COOKING_NO}_${val.ROW_NUM}`}>
-                    <StepDDiv>
-                      <StepNum>{idx + 1}</StepNum>
-                      <StepDes>
+                  <S.StepDiv key={`${val.COOKING_NO}_${val.ROW_NUM}`}>
+                    <S.StepDDiv>
+                      <S.StepNum>{idx + 1}</S.StepNum>
+                      <S.StepDes>
                         {val.COOKING_DC}
                         {val.STEP_TIP && (
                           <span style={{ fontSize: "13px" }}>
@@ -362,47 +474,87 @@ export default function RecipeDetail({ recipe }) {
                             {val.STEP_TIP}
                           </span>
                         )}
-                      </StepDes>
-                    </StepDDiv>
+                      </S.StepDes>
+                    </S.StepDDiv>
                     {val.STRE_STEP_IMAGE_URL && (
-                      <StepImg>
+                      <S.StepImg>
                         <Image
                           src={val.STRE_STEP_IMAGE_URL}
                           alt="img"
                           layout="fill"
                           objectFit="cover"
                         />
-                      </StepImg>
+                      </S.StepImg>
                     )}
-                  </StepDiv>
+                  </S.StepDiv>
                 ))}
-            </Steps>
-          </ContLine>
+            </S.Steps>
+          </S.ContLine>
           {recipe[0].author && (
-            <ContLine style={{ border: "none" }}>
-              <CookImgs>
-                <SliderComp>
-                  {Object.values(recipe[0].images).map((val) => (
-                    <ImgItem key={val}>
-                      <img
-                        src={val}
-                        display="block"
-                        style={{
-                          margin: "0 auto",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                        alt="img"
-                        align="center"
-                      />
-                    </ImgItem>
-                  ))}
-                </SliderComp>
-              </CookImgs>
-            </ContLine>
+            <>
+              <S.ContLine style={{ border: "none" }}>
+                <S.CookImgs>
+                  <SliderComp>
+                    {Object.values(recipe[0].images).map((val) => (
+                      <S.ImgItem key={val}>
+                        <img
+                          src={val}
+                          display="block"
+                          style={{
+                            margin: "0 auto",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          alt="img"
+                          align="center"
+                        />
+                      </S.ImgItem>
+                    ))}
+                  </SliderComp>
+                </S.CookImgs>
+              </S.ContLine>
+              <S.ContLine style={{ border: "none" }}>
+                <S.LikeMarkBox>
+                  <div>
+                    <IconButton
+                      style={{ padding: "10px", color: "#f44336" }}
+                      onClick={handleLike}
+                    >
+                      {state.like ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                    </IconButton>
+                    <p>{recipe[0].total_likes || 0}</p>
+                  </div>
+                  <div>
+                    <IconButton
+                      style={{ padding: "10px", color: "#4e342e" }}
+                      onClick={handleMark}
+                    >
+                      {state.bookmark ? <TurnedInIcon /> : <TurnedInNotIcon />}
+                    </IconButton>
+                    <p>{recipe[0].total_bookmarks || 0}</p>
+                  </div>
+                </S.LikeMarkBox>
+              </S.ContLine>
+              {recipe[0].content && (
+                <S.ContLine>
+                  <S.ContTitle>
+                    팁 <span>Tips</span>
+                  </S.ContTitle>
+                  <S.TipDiv>{recipe[0].content}</S.TipDiv>
+                </S.ContLine>
+              )}
+              <CommentWrapper
+                comments={recipe[0].comments}
+                postId={id}
+                userId={user.pk}
+                score={recipe[0].score_average}
+              />
+            </>
           )}
-        </Contents>
-      </Container>
+        </S.Contents>
+        <InfoBox open={open} onClose={handleClose} message={msg} id={msg} />
+      </S.Container>
+      <TopBtn />
     </CommonLayout>
   );
 }
