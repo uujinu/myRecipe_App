@@ -341,11 +341,37 @@ export default function RecipeList({ list }) {
   );
 }
 
-export async function getServerSideProps() {
-  const res = await axios.get("http://localhost:8000/posts/post/");
+export async function getServerSideProps(ctx) {
+  const { p } = ctx.query;
+  const pp = p || 1;
+
+  const today = await axios.get(`http://localhost:8000/posts/today/`);
+  const res = await axios.get(`http://localhost:8000/posts/post/?p=${pp}`);
+
+  const totalCnt = res.headers.total;
+  const idx = 16;
+  if (idx * pp > totalCnt) {
+    const diff = idx * pp - totalCnt;
+
+    if (diff >= idx) {
+      const api = await axios.get(`${
+        process.env.NEXT_PUBLIC_VIEW_TN_RECIPE_INFO
+      }
+    /${diff - idx + 1}/${diff - idx + 16}`);
+      res.data.push(...api.data.Grid_20150827000000000226_1.row);
+    } else {
+      const api =
+        await axios.get(`${process.env.NEXT_PUBLIC_VIEW_TN_RECIPE_INFO}
+    /1/${diff}`);
+      res.data.push(...api.data.Grid_20150827000000000226_1.row);
+    }
+  }
+
   return {
     props: {
+      today: today.data,
       list: res.data,
+      total: totalCnt,
     },
   };
 }
