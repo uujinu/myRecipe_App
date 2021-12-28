@@ -1,7 +1,7 @@
+/* eslint-disable array-callback-return */
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { selectUser } from "@slice/user";
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import { useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,17 +10,23 @@ import RatingStar from "@components/common/rating";
 import CommonLayout from "@components/layout/common";
 import TopBtn from "@components/common/scrollTopBtn";
 import SearchBar from "@components/common/searchBar";
+import Pagination from "react-js-pagination";
+import router from "next/router";
+import {
+  PostWrapper,
+  PostList,
+  PostCard,
+  PostInfo,
+  RcpContent,
+  Rating,
+} from "@components/common/styles/search";
+import ImageAvatar from "@components/common/avatar";
 
 const ListContainer = styled.div`
   max-width: 1980px;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(
-    to bottom,
-    #fff 12%,
-    rgb(255 236 212 / 27%) 15.74%,
-    rgb(250 225 213) 100%
-  );
+  background-color: white;
 `;
 
 const ListWrapper = styled.div`
@@ -34,7 +40,8 @@ const TitleBack = styled.div`
   }
   width: 100%;
   height: 200px;
-  background-color: #d1b7ab;
+  position: relative;
+  background-color: #ffece3;
 `;
 
 const TitleBox = styled.div`
@@ -57,19 +64,27 @@ const TitleBox = styled.div`
 const PageTitle = styled.h1`
   ${(props) => props.theme.breakpoints.down("sm")} {
     bottom: 10px;
+    font-size: 25px;
+    width: 100%;
+    text-align: center;
   }
   position: absolute;
   font-family: Rose;
   font-size: 35px;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
 `;
 
-const TopSection = styled.div`
+const TDSection = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
-    margin: 20px 5px;
+    margin-bottom: 20px;
     padding: 0;
   }
   margin-top: 40px;
   padding: 40px;
+  display: flex;
+  justify-content: center;
 `;
 
 const TDRecipeWrapper = styled.div`
@@ -77,17 +92,35 @@ const TDRecipeWrapper = styled.div`
     margin: 10px 0;
   }
   margin: 20px;
+  width: 800px;
 `;
 
-const SCTitle = styled.h2`
+const TitleSection = styled.section`
   ${(props) => props.theme.breakpoints.down("sm")} {
-    font-size: 20px;
-    margin: 25px 0 5px 0;
+    line-height: 20px;
+    margin-bottom: 20px;
+  }
+  font-family: GmarketSansMedium;
+  text-align: center;
+  margin-bottom: 40px;
+  line-height: 30px;
+`;
+
+const Title = styled.h2`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    font-size: 25px;
+    margin-bottom: 7px;
   }
   font-size: 30px;
-  font-family: GmarketSansMedium;
-  border-bottom: 5px solid #887a73;
-  margin-bottom: 40px;
+  letter-spacing: 7px;
+  text-shadow: 2px 2px #fad5c4;
+`;
+
+const TitleSub = styled.span`
+  font-size: 13px;
+  font-weight: bold;
+  color: #ff9260;
+  letter-spacing: initial;
 `;
 
 const TDRecipeBox = styled.div`
@@ -109,25 +142,6 @@ const ImgWrapper = styled.div`
   overflow: hidden;
   width: 100%;
   height: 300px;
-  border-radius: 15px;
-
-  transition-property: box-shadow;
-  transition-timing-function: cubic-bezier(0.24, 1.03, 1, 1);
-
-  & > div.info {
-    transition-property: opacity;
-    -webkit-transition: 0.4s ease-out;
-    transition: 0.4s ease-out;
-    opacity: 0;
-  }
-
-  &:hover {
-    box-shadow: 5px 4px 6px 0 rgb(0 0 0 / 28%);
-
-    & > div.info {
-      opacity: 1;
-    }
-  }
 `;
 
 const ImgItem = styled.div`
@@ -152,10 +166,6 @@ const ImgItem = styled.div`
   position: relative;
 `;
 
-const RecipeMark = styled.div`
-  cursor: pointer;
-`;
-
 const RecipeTitle = styled.a`
   font-family: GmarketSansMedium;
   font-size: 20px;
@@ -177,8 +187,8 @@ const RecipeDetail = styled.div`
   color: black;
   height: 120px;
   width: 100%;
-  background-color: white;
-  border-radius: 15px;
+  background-color: #faf8f5;
+  border: 1px solid #0000000a;
 
   & > div {
     display: flex;
@@ -196,45 +206,37 @@ const RCard = styled.div`
 
 const RatingBox = styled.div`
   margin-left: auto;
-  align-items: end;
+  align-items: flex-start;
+  padding: 0 3px;
 `;
 
-function RecipeCard({ recipeInfo, pk, marks, src }) {
-  const [mark, setMark] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [info, setInfo] = useState(recipeInfo);
+const SearchSection = styled.section`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    width: 100%;
+    height: 150px;
+  }
+  background-color: #faf8f5;
+  width: 800px;
+  height: 200px;
+  margin: 0 auto;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #0000000a;
+`;
 
-  const { open, handleOpen, handleClose } = SnackBar();
+const MenuSection = styled.div`
+  margin: 0 auto;
+  padding: 40px;
+`;
 
-  useEffect(() => {
-    if (pk) {
-      // 해당 포스트의 북마크 여부 확인
-      const res = marks.find((m) => m === info.id);
-      if (res) setMark(true);
-      else setMark(false);
-    }
-  }, [marks]);
+const Paginate = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    width: 100%;
+  }
+`;
 
-  const handleMark = (e) => {
-    if (pk) {
-      const method = mark ? "delete" : "post";
-      setMsg(mark ? "북마크가 취소되었습니다." : "북마크되었습니다.");
-      setMark(!mark);
-
-      axiosWrapper(
-        method,
-        `/accounts/bookmark/${info.id}/`,
-        undefined,
-        (res) => {
-          handleOpen();
-        },
-        () => {
-          alert("오류가 발생했습니다.");
-        },
-      );
-    } else {
-      alert("로그인이 필요합니다.");
-    }
 function RecipeCard({ recipeInfo, src }) {
   const [info, setInfo] = useState(recipeInfo);
 
@@ -266,38 +268,100 @@ function RecipeCard({ recipeInfo, src }) {
   );
 }
 
-export default function RecipeList({ list }) {
-  const { user } = useSelector(selectUser);
-  const [marks, setMarks] = useState([]);
-
-  useEffect(() => {
-    // 로그인한 유저에 대해서만 북마크 목록 불러옴
-    if (user.pk) {
-      axiosWrapper(
-        "get",
-        "http://localhost:8000/accounts/bookmark/",
-        undefined,
-        (res) => {
-          setMarks(res.data.bookmarks);
-        },
-        (err) => {
-          console.log("err: ", err);
-        },
-      );
-    }
+function NewPost({ list }) {
+  return (
+    <PostWrapper>
+      <PostList>
+        {Object.values(list).map((val) => (
+          <PostCard key={val.author ? `${val.id}_${val.title}` : val.RECIPE_ID}>
+            <Link
+              href={
+                val.id
+                  ? `/posts/${val.id}`
+                  : `/posts/${val.RECIPE_ID}?nm=${encodeURIComponent(
+                      val.RECIPE_NM_KO,
+                    )}`
+              }
+              passHref
+            >
+              <a>
+                <div
+                  style={{
+                    position: "relative",
+                    height: "222px",
+                  }}
+                >
+                  <Image
+                    src={val.IMG_URL || val.thumbnail || "/myrecipe_logo.png"}
+                    alt="img"
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                  <p>{val.title || val.RECIPE_NM_KO}</p>
+                </div>
+              </a>
+            </Link>
+            <PostInfo>
+              <>
+                {val.author && (
+                  <>
+                    <Link href={`/profile/${val.author.pk}`} passHref>
+                      <a>
+                        <div>
+                          <ImageAvatar
+                            name={val.author.nickname}
+                            image={val.author.profile_image}
+                          />
+                        </div>
+                        <div>{val.author.nickname}</div>
+                      </a>
+                    </Link>
+                    <Rating>
+                      <RatingStar value={val.score_average} readOnly />
+                      <div
+                        style={{
+                          fontSize: "10px",
+                          lineHeight: "20px",
+                        }}
+                      >
+                        ({val.score_average || 0})
+                      </div>
+                    </Rating>
+                  </>
+                )}
+                {!val.author && (
+                  <RcpContent>
+                    <div>
+                      <ImageAvatar
+                        name={val.RECIPE_NM_KO}
+                        image="/myrecipe_logo.png"
+                      />
+                    </div>
+                    <div>MyRecipe</div>
+                  </RcpContent>
+                )}
+              </>
+            </PostInfo>
+          </PostCard>
+        ))}
+      </PostList>
+    </PostWrapper>
+  );
+}
 
 export default function RecipeList({ today, list, total }) {
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    // 전체 글 목록
-    console.log("clientside: ", list);
-  }, []);
+  const handlePageChange = (p) => {
+    setPage(p);
+    router.push(`/posts/?p=${p}`);
+  };
 
   return (
     <CommonLayout fix={0}>
       <TitleBack>
         <TitleBox />
-          <PageTitle>맛있는 레시피가 한가득!</PageTitle>
+        <PageTitle>맛있는 레시피가 한가득!</PageTitle>
       </TitleBack>
       <ListContainer>
         <ListWrapper>
@@ -330,8 +394,28 @@ export default function RecipeList({ today, list, total }) {
             </TitleSection>
             <SearchBar margin={1} />
           </SearchSection>
+          <TDSection>
+            <MenuSection>
+              <TitleSection>
+                <Title>최신 레시피</Title>
+                <TitleSub>새로운 레시피가 궁금해!</TitleSub>
+              </TitleSection>
+              <NewPost list={list} />
+            </MenuSection>
+          </TDSection>
         </ListWrapper>
       </ListContainer>
+      <Paginate>
+        <Pagination
+          activePage={page}
+          itemsCountPerPage={16}
+          totalItemsCount={parseInt(total, 10) + 537}
+          pageRangeDisplayed={5}
+          prevPageText="‹"
+          nextPageText="›"
+          onChange={handlePageChange}
+        />
+      </Paginate>
       <TopBtn />
     </CommonLayout>
   );
