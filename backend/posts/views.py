@@ -224,12 +224,15 @@ def like(request, post_id=None):
             return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
         try:
             post = Post.objects.get(id=post_id)
+            res = {}
             if post.likes.filter(id=request.user.id).exists():
                 post.likes.remove(request.user)
-                return Response('좋아요가 취소되었습니다.', status=status.HTTP_200_OK)
+                res['msg'] = '좋아요가 취소되었습니다.'
             else:
                 post.likes.add(request.user)
-                return Response('좋아요가 추가되었습니다.', status=status.HTTP_200_OK)
+                res['msg'] = '좋아요가 추가되었습니다.'
+            res['count'] = post.likes.count()
+            return Response(res, status=status.HTTP_200_OK)
         except:
             return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
 
@@ -245,11 +248,14 @@ def bookmark(request, post_id=None):
             return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
         try:
             post = Post.objects.get(id=post_id)
+            res = {}
             if post.bookmarks.filter(id=request.user.id).exists():
                 post.bookmarks.remove(request.user)
-                return Response('북마크가 취소되었습니다.', status=status.HTTP_200_OK)
+                res['msg'] = '북마크가 취소되었습니다.'
             else:
                 post.bookmarks.add(request.user)
-                return Response('북마크가 추가되었습니다.', status=status.HTTP_200_OK)
+                res['msg'] = '북마크가 추가되었습니다.'
+            res['count'] = post.bookmarks.count()
+            return Response(res, status=status.HTTP_200_OK)
         except:
             return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
