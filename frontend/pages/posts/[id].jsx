@@ -244,6 +244,10 @@ export default function RecipeDetail({ recipe }) {
     like: false,
     bookmark: false,
   });
+  const [mark, setMark] = useState({
+    like: recipe[0].total_likes || 0,
+    bookmark: recipe[0].total_bookmarks || 0,
+  });
   const [msg, setMsg] = useState("");
   const router = useRouter();
   const { id, nm } = router.query;
@@ -296,8 +300,10 @@ export default function RecipeDetail({ recipe }) {
         undefined,
         (res) => {
           state.like = !state.like;
-          setMsg(res.data);
+          mark.like = res.data.count;
+          setMsg(res.data.msg);
           setState({ ...state });
+          setMark({ ...mark });
           handleOpen();
         },
         () => {
@@ -316,8 +322,10 @@ export default function RecipeDetail({ recipe }) {
         undefined,
         (res) => {
           state.bookmark = !state.bookmark;
-          setMsg(res.data);
+          mark.bookmark = res.data.count;
+          setMsg(res.data.msg);
           setState({ ...state });
+          setMark({ ...mark });
           handleOpen();
         },
         () => {
@@ -522,7 +530,7 @@ export default function RecipeDetail({ recipe }) {
                     >
                       {state.like ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                     </IconButton>
-                    <p>{recipe[0].total_likes || 0}</p>
+                    <p>{mark.like}</p>
                   </div>
                   <div>
                     <IconButton
@@ -531,7 +539,7 @@ export default function RecipeDetail({ recipe }) {
                     >
                       {state.bookmark ? <TurnedInIcon /> : <TurnedInNotIcon />}
                     </IconButton>
-                    <p>{recipe[0].total_bookmarks || 0}</p>
+                    <p>{mark.bookmark}</p>
                   </div>
                 </S.LikeMarkBox>
               </S.ContLine>
