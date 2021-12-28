@@ -238,14 +238,14 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
     } else {
       alert("로그인이 필요합니다.");
     }
-  };
+function RecipeCard({ recipeInfo, src }) {
+  const [info, setInfo] = useState(recipeInfo);
 
   return (
     <>
       <RCard>
         <ImgWrapper>
           <Link href={`/posts/${info.id}`} passHref>
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a>
               <ImgItem>
                 <Image src={src} alt="img" layout="fill" objectFit="cover" />
@@ -258,20 +258,13 @@ function RecipeCard({ recipeInfo, pk, marks, src }) {
             <Link href={`/posts/${info.id}`} passHref>
               <RecipeTitle>{info.title}</RecipeTitle>
             </Link>
-            <RecipeMark onClick={handleMark}>
-              {mark && <TurnedInRoundedIcon />}
-              {!mark && <TurnedInNotOutlinedIcon />}
-            </RecipeMark>
           </div>
           <RatingBox>
             <RatingStar value={info.score_average} precision={0.1} readOnly />
-            <div style={{ fontSize: "15px" }}>
-              ({info.score_average ? info.score_average : 0})
-            </div>
+            <div>({info.score_average ? info.score_average : 0})</div>
           </RatingBox>
         </RecipeDetail>
       </RCard>
-      <InfoBox open={open} onClose={handleClose} message={msg} id={info.id} />
     </>
   );
 }
@@ -295,7 +288,8 @@ export default function RecipeList({ list }) {
         },
       );
     }
-  }, []);
+
+export default function RecipeList({ today, list, total }) {
 
   useEffect(() => {
     // 전체 글 목록
@@ -305,35 +299,33 @@ export default function RecipeList({ list }) {
   return (
     <CommonLayout fix={0}>
       <TitleBack>
-        <TitleBox>
+        <TitleBox />
           <PageTitle>맛있는 레시피가 한가득!</PageTitle>
-        </TitleBox>
       </TitleBack>
       <ListContainer>
         <ListWrapper>
-          <TopSection>
+          <TDSection>
             <TDRecipeWrapper>
-              <SCTitle>오늘의 레시피</SCTitle>
+              <TitleSection>
+                <Title>오늘의 레시피</Title>
+                <TitleSub>뭐 해먹지? 고민은 이제 그만!</TitleSub>
+              </TitleSection>
               <TDRecipeBox>
                 <RecipeCard
-                  pk={user.pk}
-                  recipeInfo={list[0]}
-                  marks={marks}
+                  recipeInfo={today[0]}
                   src={
-                    list[0].thumbnail ? list[0].thumbnail : "/thumb_basic.jpg"
+                    today[0].thumbnail ? today[0].thumbnail : "/thumb_basic.jpg"
                   }
                 />
                 <RecipeCard
-                  pk={user.pk}
-                  recipeInfo={list[1]}
-                  marks={marks}
+                  recipeInfo={today[1]}
                   src={
-                    list[1].thumbnail ? list[1].thumbnail : "/thumb_basic.jpg"
+                    today[1].thumbnail ? today[1].thumbnail : "/thumb_basic.jpg"
                   }
                 />
               </TDRecipeBox>
             </TDRecipeWrapper>
-          </TopSection>
+          </TDSection>
         </ListWrapper>
       </ListContainer>
       <TopBtn />
