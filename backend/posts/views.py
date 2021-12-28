@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import requests
+from django.core.paginator import EmptyPage, Paginator
 
 
 class PostView(viewsets.ModelViewSet):
@@ -102,6 +103,22 @@ class PostView(viewsets.ModelViewSet):
         serializer.save(author=request.user)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+        if self.action == 'list':
+            post_all = Post.objects.all()
+            page = int(self.request.GET.get('p', 1))
+            try:
+                paginator = Paginator(post_all, 16).page(page)
+            except EmptyPage:
+                return {}
+            return paginator
+        return super().get_queryset()
+
+    def list(self, request, *args, **kwargs):
+        res = super().list(request, *args, **kwargs)
+        res['total'] = Post().count
+        return res
 
 
 class CommentView(viewsets.ModelViewSet):
