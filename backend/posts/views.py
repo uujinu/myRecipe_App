@@ -259,3 +259,10 @@ def bookmark(request, post_id=None):
             return Response(res, status=status.HTTP_200_OK)
         except:
             return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['get'])
+@permission_classes((AllowAny,))
+def today(request):
+    data = Post.objects.filter(id__in=[1, 2])
+    return Response(PostListSerializer(data, many=True).data, status=status.HTTP_200_OK)
