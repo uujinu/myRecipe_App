@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.fields import DateTimeField
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 
 def url(instance, filename):
@@ -93,6 +94,10 @@ class Post(models.Model):
 
     def total_comments(self):
         return self.comments.count()
+
+    @cached_property
+    def count(self):
+        return len(Post.objects.all())
 
 
 class Ingredient(models.Model):
