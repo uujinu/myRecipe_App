@@ -5,155 +5,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import styled from "styled-components";
 import CommonLayout from "@components/layout/common";
 import SearchBar from "@components/common/searchBar";
 import TopBtn from "@components/common/scrollTopBtn";
 import ImageAvatar from "@components/common/avatar";
 import RatingStar from "@components/common/rating";
+import * as S from "@components/common/styles/search";
 import Pagination from "react-js-pagination";
-
-const Container = styled.div`
-  max-width: 1980px;
-  min-height: 100vh;
-  padding-top: 100px;
-  width: 100%;
-  background-color: #fff;
-`;
-
-const Search = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    margin: 0;
-    height: 120px;
-  }
-  height: 180px;
-  padding: 40px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(181deg, #ffdee1, #fad5c4);
-`;
-
-const ContentBox = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 10px 0;
-    width: 100%;
-    margin: 0;
-  }
-  width: 75rem;
-  margin: 0 auto;
-  height: 100%;
-`;
-
-const InfoBox = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    padding: 0;
-    font-size: 15px;
-  }
-  padding: 40px 80px;
-  text-align: center;
-  font-size: 17px;
-
-  & > span {
-    color: #f4726c;
-  }
-
-  & > p {
-    font-size: 15px;
-    line-height: 25px;
-    margin-top: 50px;
-  }
-`;
-
-const SearchResInfo = styled.div`
-  text-align: initial;
-`;
-
-const PostWrapper = styled.div`
-  height: 100%;
-`;
-
-const PostList = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-`;
-
-const PostCard = styled.li`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    margin: 0 0 50px;
-    width: 100%;
-  }
-  width: 222px;
-  margin: 0 3px 50px;
-
-  & > a > div > div {
-    border-radius: 10px;
-  }
-
-  &:hover {
-    & > a > div {
-      color: #f4726c;
-      font-weight: bold;
-    }
-  }
-
-  & > a > div > p {
-    position: relative;
-    top: 230px;
-    text-align: initial;
-    padding: 0 7px;
-  }
-`;
-
-const PostInfo = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  position: relative;
-  bottom: -30px;
-  text-align: initial;
-  padding: 0 3px;
-  font-size: 12px;
-
-  & > a {
-    display: flex;
-    align-items: center;
-    margin: 2px 0;
-
-    & > div > div {
-      width: 30px;
-      height: 30px;
-    }
-  }
-`;
-
-const Paginate = styled.div`
-  ${(props) => props.theme.breakpoints.down("sm")} {
-    width: 100%;
-  }
-`;
-
-const Rating = styled.div`
-  display: flex;
-  padding: 0 5px;
-  & > span {
-    font-size: 15px;
-  }
-`;
-
-const RcpContent = styled.div`
-  display: flex;
-  align-items: center;
-  margin: 2px 0;
-  font-family: IBMPlexSansKR-Medium;
-  & > div > div {
-    width: 30px;
-    height: 30px;
-    position: relative;
-  }
-`;
 
 export default function SearchPage({ posts }) {
   const { query } = useRouter();
@@ -177,13 +35,13 @@ export default function SearchPage({ posts }) {
   return (
     <>
       <CommonLayout>
-        <Container>
-          <Search>
+        <S.Container>
+          <S.Search>
             <SearchBar searchVal={query.q} />
-          </Search>
-          <ContentBox>
+          </S.Search>
+          <S.ContentBox>
             {Boolean(!posts.length) && (
-              <InfoBox>
+              <S.InfoBox>
                 <span>
                   <strong>
                     {"'"}
@@ -198,17 +56,17 @@ export default function SearchPage({ posts }) {
                   - 다른 검색어로 검색해 보세요.
                   <br />- 더 일반적인 검색어로 다시 검색해 보세요.
                 </p>
-              </InfoBox>
+              </S.InfoBox>
             )}
             {Boolean(posts.length) && (
-              <InfoBox>
-                <SearchResInfo>
+              <S.InfoBox>
+                <S.SearchResInfo>
                   <strong>{query.q}</strong>에 대한 검색결과입니다.
-                </SearchResInfo>
-                <PostWrapper>
-                  <PostList>
+                </S.SearchResInfo>
+                <S.PostWrapper>
+                  <S.PostList>
                     {Object.values(recipe).map((val) => (
-                      <PostCard key={`${val.id}_${val.title}`}>
+                      <S.PostCard key={`${val.id}_${val.title}`}>
                         <Link
                           href={
                             val.id
@@ -240,7 +98,7 @@ export default function SearchPage({ posts }) {
                             </div>
                           </a>
                         </Link>
-                        <PostInfo>
+                        <S.PostInfo>
                           <>
                             {val.author && (
                               <>
@@ -258,7 +116,7 @@ export default function SearchPage({ posts }) {
                                     <div>{val.author.nickname}</div>
                                   </a>
                                 </Link>
-                                <Rating>
+                                <S.Rating>
                                   <RatingStar
                                     value={val.score_average}
                                     readOnly
@@ -271,11 +129,11 @@ export default function SearchPage({ posts }) {
                                   >
                                     ({val.score_average || 0})
                                   </div>
-                                </Rating>
+                                </S.Rating>
                               </>
                             )}
                             {!val.author && (
-                              <RcpContent>
+                              <S.RcpContent>
                                 <div>
                                   <ImageAvatar
                                     name={val.title}
@@ -283,20 +141,20 @@ export default function SearchPage({ posts }) {
                                   />
                                 </div>
                                 <div>MyRecipe</div>
-                              </RcpContent>
+                              </S.RcpContent>
                             )}
                           </>
-                        </PostInfo>
-                      </PostCard>
+                        </S.PostInfo>
+                      </S.PostCard>
                     ))}
-                  </PostList>
-                </PostWrapper>
-              </InfoBox>
+                  </S.PostList>
+                </S.PostWrapper>
+              </S.InfoBox>
             )}
-          </ContentBox>
-        </Container>
+          </S.ContentBox>
+        </S.Container>
         <TopBtn />
-        <Paginate>
+        <S.Paginate>
           <Pagination
             activePage={page}
             itemsCountPerPage={16}
@@ -306,7 +164,7 @@ export default function SearchPage({ posts }) {
             nextPageText="›"
             onChange={handlePageChange}
           />
-        </Paginate>
+        </S.Paginate>
       </CommonLayout>
     </>
   );
