@@ -9,10 +9,7 @@ import axios from "axios";
 import RatingStar from "@components/common/rating";
 import CommonLayout from "@components/layout/common";
 import TopBtn from "@components/common/scrollTopBtn";
-import InfoBox, { SnackBar } from "@components/common/snackbar/index";
-import TurnedInNotOutlinedIcon from "@material-ui/icons/TurnedInNotOutlined";
-import TurnedInRoundedIcon from "@material-ui/icons/TurnedInRounded";
-import axiosWrapper from "../../src/helpers/axiosWrapper";
+import SearchBar from "@components/common/searchBar";
 
 const ListContainer = styled.div`
   max-width: 1980px;
@@ -326,6 +323,13 @@ export default function RecipeList({ today, list, total }) {
               </TDRecipeBox>
             </TDRecipeWrapper>
           </TDSection>
+          <SearchSection>
+            <TitleSection style={{ border: "none", marginBottom: 0 }}>
+              <Title>레시피 찾기</Title>
+              <TitleSub>원하는 레시피를 찾아보세요!</TitleSub>
+            </TitleSection>
+            <SearchBar margin={1} />
+          </SearchSection>
         </ListWrapper>
       </ListContainer>
       <TopBtn />
