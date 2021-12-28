@@ -84,6 +84,7 @@ export const CookInfoBox = styled.div`
     font-size: 13px;
     text-align: center;
     color: #bcb7b7;
+    align-items: center;
 
     & > .MuiSvgIcon-root {
       width: 40px;
