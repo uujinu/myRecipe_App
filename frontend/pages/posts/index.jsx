@@ -349,11 +349,8 @@ function NewPost({ list }) {
   );
 }
 
-export default function RecipeList({ today, list, total }) {
-  const [page, setPage] = useState(1);
-
+export default function RecipeList({ page, today, list, total }) {
   const handlePageChange = (p) => {
-    setPage(p);
     router.push(`/posts/?p=${p}`);
   };
 
@@ -407,7 +404,7 @@ export default function RecipeList({ today, list, total }) {
       </ListContainer>
       <Paginate>
         <Pagination
-          activePage={page}
+          activePage={parseInt(page, 10)}
           itemsCountPerPage={16}
           totalItemsCount={parseInt(total, 10) + 537}
           pageRangeDisplayed={5}
@@ -449,6 +446,7 @@ export async function getServerSideProps(ctx) {
 
   return {
     props: {
+      page: pp,
       today: today.data,
       list: res.data,
       total: totalCnt,
