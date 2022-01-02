@@ -202,9 +202,9 @@ def following(request, user_id=None):
 @api_view(['get'])
 @permission_classes((IsAuthenticated,))
 def info(request):
-    user_id = request.GET['user']
-    post_id = request.GET['post']
-    if user_id and post_id is None:
+    user_id = request.query_params.get('user')
+    post_id = request.query_params.get('post')
+    if (user_id or post_id) is None:
         return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
 
     res = {}
