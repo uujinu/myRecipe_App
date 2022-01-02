@@ -11,7 +11,7 @@ from .models import *
 from .serializers import *
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import requests
 from django.core.paginator import EmptyPage, Paginator
@@ -116,6 +116,10 @@ class PostView(viewsets.ModelViewSet):
         return super().get_queryset()
 
     def list(self, request, *args, **kwargs):
+        id = request.query_params.get('userId')
+        if id is not None:
+            data = Post.objects.filter(author=int(id))
+            return Response(PostListSerializer(data, many=True).data)
         res = super().list(request, *args, **kwargs)
         res['total'] = Post().count
         return res
@@ -143,6 +147,12 @@ class CommentView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def list(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user')
+        # 사용자가 댓글 단 글
+        if user_id is not None:
+            data = PostListSerializer(Post.objects.filter(
+                comments__author=user_id), many=True).data
+            return Response(data, status=status.HTTP_200_OK)
         if kwargs['post_id'] is None:
             return Response('잘못된 요청입니다.', status=status.HTTP_400_BAD_REQUEST)
         data = CommentSerializer(Post.objects.get(
@@ -213,11 +223,12 @@ def jsonData(request):
     return JsonResponse({'data': list(ary)})
 
 
-@api_view(['get', 'post', 'delete'])
-@permission_classes((IsAuthenticated,))
+@ api_view(['get', 'post', 'delete'])
+@ permission_classes((IsAuthenticatedOrReadOnly,))
 def like(request, post_id=None):
     if request.method == 'GET':  # 사용자 좋아요 리스트
-        like_list = User.objects.get(id=request.user.id).like_posts.all()
+        user_id = request.query_params.get('user')
+        like_list = User.objects.get(id=user_id).like_posts.all()
         return Response(PostListSerializer(like_list, many=True).data, status=status.HTTP_200_OK)
     else:  # 좋아요 생성/삭제
         if post_id is None:
@@ -237,11 +248,12 @@ def like(request, post_id=None):
             return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['get', 'post', 'delete'])
-@permission_classes((IsAuthenticated,))
+@ api_view(['get', 'post', 'delete'])
+@ permission_classes((IsAuthenticatedOrReadOnly,))
 def bookmark(request, post_id=None):
     if request.method == 'GET':  # 사용자 북마크 리스트
-        mark_list = User.objects.get(id=request.user.id).bookmarks.all()
+        user_id = request.query_params.get('user')
+        mark_list = User.objects.get(id=user_id).bookmarks.all()
         return Response(PostListSerializer(mark_list, many=True).data, status=status.HTTP_200_OK)
     else:  # 북마크 생성/삭제
         if post_id is None:
@@ -261,8 +273,8 @@ def bookmark(request, post_id=None):
             return Response('존재하지 않는 포스트입니다.', status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['get'])
-@permission_classes((AllowAny,))
+@ api_view(['get'])
+@ permission_classes((AllowAny,))
 def today(request):
     data = Post.objects.filter(id__in=[1, 2])
     return Response(PostListSerializer(data, many=True).data, status=status.HTTP_200_OK)

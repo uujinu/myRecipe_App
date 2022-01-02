@@ -18,6 +18,7 @@ urlpatterns = [
 
     path('<int:post_id>/comment/',
          CommentView.as_view({'post': 'create', 'get': 'list'}), name='comment-add'),
+    path('comment/', CommentView.as_view({'get': 'list'})),
     path('comment/<int:pk>/',
          CommentView.as_view({'patch': 'partial_update', 'delete': 'destroy'}), name='comment-manage'),
 
