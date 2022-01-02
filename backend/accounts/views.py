@@ -7,7 +7,7 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from .models import Following, User
 from rest_framework import generics, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
@@ -171,11 +171,16 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 
 @api_view(['get', 'post', 'delete'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticatedOrReadOnly,))
 def following(request, user_id=None):
     if request.method == 'GET':  # 사용자 팔로잉 리스트
-        following_list = User.objects.filter(followers__user=request.user.id)
-        return Response(UserSerializer(following_list, many=True).data, status=status.HTTP_200_OK)
+        user = User.objects.get(id=user_id)
+        following_list = User.objects.filter(followers__user=user)
+        following = UserSerializer(following_list, many=True).data
+        follower_list = User.objects.filter(
+            followings__following_user=user)
+        follower = UserSerializer(follower_list, many=True).data
+        return Response({'following': following, 'follower': follower}, status=status.HTTP_200_OK)
 
     else:  # 팔로잉 생성/삭제
         if user_id is None or user_id == request.user.id:
