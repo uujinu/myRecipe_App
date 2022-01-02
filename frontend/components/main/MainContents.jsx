@@ -6,6 +6,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@material-ui/core";
+import { useSelector } from "react-redux";
+import { selectUser } from "@slice/user";
+import CreateIcon from "@material-ui/icons/Create";
 import SearchBar from "../common/searchBar";
 
 const MainContainer = styled.div`
@@ -236,6 +239,8 @@ function RecentWrapper({ recipeInfo, height }) {
 }
 
 export default function MainComponent({ list }) {
+  const { user } = useSelector(selectUser);
+
   return (
     <>
       <MainContainer>
@@ -272,16 +277,27 @@ export default function MainComponent({ list }) {
           </ViewMore>
         </ContentBox>
         <ContentBox style={{ padding: "0", marginBottom: "50px" }}>
-          <SignUpBox>
-            <h3>
-              더 많은 레시피를 알고싶다면?
-              <br />
-              MyRecipe와 함께 하세요.
-            </h3>
-            <Button href="/accounts/signup" variant="outlined">
-              Join Us!
-            </Button>
-          </SignUpBox>
+          {!user.pk && (
+            <SignUpBox>
+              <h3>
+                더 많은 레시피를 알고싶다면?
+                <br />
+                MyRecipe와 함께 하세요.
+              </h3>
+              <Button href="/accounts/signup" variant="outlined">
+                Join Us!
+              </Button>
+            </SignUpBox>
+          )}
+          {user.pk && (
+            <SignUpBox>
+              <h3>특별한 레시피를 MyRecipe에 소개해주세요!</h3>
+              <Button href="/manage/newpost" variant="outlined">
+                <CreateIcon style={{ fontSize: "22px", marginRight: "5px" }} />{" "}
+                작성하기
+              </Button>
+            </SignUpBox>
+          )}
         </ContentBox>
       </MainContainer>
     </>
