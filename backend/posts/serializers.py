@@ -57,6 +57,7 @@ class PostWriteSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         cooksteps = validated_data.pop('cooksteps')
         images = ''
+        thumb = ''
 
         if validated_data.get('images'):
             images = validated_data.pop('images')
