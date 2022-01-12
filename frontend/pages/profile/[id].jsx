@@ -9,9 +9,10 @@ import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import PersonIcon from "@material-ui/icons/Person";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
+import SettingsIcon from "@material-ui/icons/Settings";
+import { IconButton, Tabs, Tab, Breadcrumbs } from "@material-ui/core";
 import ImageAvatar from "@components/common/avatar";
 import InfoBox, { SnackBar } from "@components/common/snackbar";
-import { IconButton, Tabs, Tab, Breadcrumbs } from "@material-ui/core";
 import axiosWrapper from "../../src/helpers/axiosWrapper";
 
 const Container = styled.div`
@@ -64,6 +65,17 @@ const Info = styled.div`
   text-align: center;
 `;
 
+const ButtonDiv = styled.div`
+  position: relative;
+
+  & > button {
+    border-radius: 5px;
+    margin-left: 3px;
+    position: absolute;
+    top: -6px;
+  }
+`;
+
 const UserFollow = styled.div`
   display: flex;
   justify-content: space-around;
@@ -110,6 +122,13 @@ const TabStyle = styled(Tab)`
 const TabContainer = styled.div``;
 
 const TitleBox = styled.div`
+  ${(props) => props.theme.breakpoints.down("sm")} {
+    flex-direction: column;
+
+    & > nav {
+      padding: 10px 0 0px 14px;
+    }
+  }
   display: flex;
   align-items: baseline;
 `;
@@ -152,6 +171,10 @@ const PostItem = styled.div`
 const PostImg = styled.div`
   ${(props) => props.theme.breakpoints.down("sm")} {
     width: 100%;
+
+    & > p {
+      padding-left: 5px;
+    }
   }
   position: relative;
   width: 241px;
@@ -248,6 +271,7 @@ function PersonCard({ value }) {
 }
 
 export default function ProfilePage({
+  profile,
   post,
   following,
   like,
@@ -258,13 +282,14 @@ export default function ProfilePage({
   const [follow, setFollow] = useState(false);
   const [msg, setMsg] = useState("");
   const [value, setValue] = useState(0);
-  const [sub, setSub] = useState([true, false]);
+  const [sub, setSub] = useState([true, false, false, false]);
   const { user } = useSelector(selectUser);
   const { open, handleOpen, handleClose } = SnackBar();
 
   const id = parseInt(router.query.id, 10);
 
   useEffect(() => {
+    console.log("profile: ", profile);
     console.log("list: ", post);
     console.log("following: ", following);
     console.log("like: ", like);
@@ -273,7 +298,7 @@ export default function ProfilePage({
   });
 
   useEffect(() => {
-    if (id !== user.pk) {
+    if (user.pk && id !== user.pk) {
       axiosWrapper(
         "get",
         `/accounts/info/?user=${id}`,
@@ -307,6 +332,12 @@ export default function ProfilePage({
     }
   };
 
+  const handleSetting = () => {
+    if (user.pk === id) {
+      router.push("/manage");
+    }
+  };
+
   const handleChange = (e, newValue) => {
     setValue(newValue);
   };
@@ -316,7 +347,15 @@ export default function ProfilePage({
   };
 
   const handleClick = (e) => {
-    if (e.target.value === "false") setSub([sub[1], sub[0]]);
+    if (e.target.value === "false") {
+      const idx = sub.indexOf(true);
+      const newIdx = parseInt(e.target.name, 10);
+      const temp = [...sub];
+      temp[idx] = !temp[idx];
+      temp[newIdx] = !temp[newIdx];
+
+      setSub([...temp]);
+    }
   };
 
   return (
@@ -325,26 +364,32 @@ export default function ProfilePage({
         <BackColor />
         <AvatarWrapper>
           <Avatar>
-            <ImageAvatar name={user.nickname} image={user.profile_image} />
+            <ImageAvatar
+              name={profile.nickname}
+              image={profile.profile_image}
+            />
             <Info>
-              <div style={{ position: "relative" }}>
-                <span>{user.nickname}</span>
+              <ButtonDiv style={{ position: "relative" }}>
+                <span>{profile.nickname}</span>
                 {id !== user.pk && (
                   <IconButton
                     size="small"
                     color="secondary"
-                    style={{
-                      borderRadius: "5px",
-                      marginLeft: "3px",
-                      position: "absolute",
-                      top: "-6px",
-                    }}
                     onClick={handleFollowing}
                   >
                     {follow ? <PersonIcon /> : <PersonAddIcon />}
                   </IconButton>
                 )}
-              </div>
+                {id === user.pk && (
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    onClick={handleSetting}
+                  >
+                    <SettingsIcon />
+                  </IconButton>
+                )}
+              </ButtonDiv>
               <UserFollow>
                 <Tabs
                   value={value}
@@ -374,6 +419,7 @@ export default function ProfilePage({
               <Breadcrumbs aria-label="breadcrumb">
                 <TabBtn
                   type="button"
+                  name="0"
                   value={sub[0]}
                   sub={sub[0]}
                   onClick={handleClick}
@@ -382,17 +428,42 @@ export default function ProfilePage({
                 </TabBtn>
                 <TabBtn
                   type="button"
+                  name="1"
                   value={sub[1]}
                   sub={sub[1]}
                   onClick={handleClick}
                 >
                   댓글 단 글
                 </TabBtn>
+                {id === user.pk && (
+                  <TabBtn
+                    type="button"
+                    name="2"
+                    value={sub[2]}
+                    sub={sub[2]}
+                    onClick={handleClick}
+                  >
+                    좋아요
+                  </TabBtn>
+                )}
+                {id === user.pk && (
+                  <TabBtn
+                    type="button"
+                    name="3"
+                    value={sub[3]}
+                    sub={sub[3]}
+                    onClick={handleClick}
+                  >
+                    북마크
+                  </TabBtn>
+                )}
               </Breadcrumbs>
             </TitleBox>
             <SubBox>
               {sub[0] && <PostCard value={post} />}
               {sub[1] && <PostCard value={comment} />}
+              {sub[2] && <PostCard value={like} />}
+              {sub[3] && <PostCard value={bookmark} />}
             </SubBox>
           </TabPanel>
           <TabPanel value={value} index={1}>
@@ -417,6 +488,7 @@ export default function ProfilePage({
 export async function getServerSideProps(ctx) {
   const { id } = ctx.query;
   const url = "http://localhost:8000";
+  const profile = await axios.get(`${url}/accounts/users/${id}`);
   const post = await axios.get(`${url}/posts/post/?userId=${id}`);
   const following = await axios.get(`${url}/accounts/following/${id}`);
   const like = await axios.get(`${url}/posts/like/?user=${id}`);
@@ -424,6 +496,7 @@ export async function getServerSideProps(ctx) {
   const comment = await axios.get(`${url}/posts/comment/?user=${id}`);
   return {
     props: {
+      profile: profile.data.user,
       post: post.data,
       following: following.data,
       like: like.data,
