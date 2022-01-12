@@ -224,7 +224,7 @@ function RecentWrapper({ recipeInfo, height }) {
           <a>
             <div style={{ position: "relative", height: height || "600px" }}>
               <Image
-                src={info.thumbnail}
+                src={info.thumbnail || "/myrecipe_logo.png"}
                 alt="img"
                 layout="fill"
                 objectFit="cover"
