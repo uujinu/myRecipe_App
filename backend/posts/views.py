@@ -84,9 +84,7 @@ class PostView(viewsets.ModelViewSet):
                 request_data['images'] = tempArr
 
             # thumbnail
-            if request_data['thumbnail'] == '':
-                request_data.pop('thumbnail')
-            else:
+            if request_data.get('thumbnail') is not None:
                 img = request_data['thumbnail']
                 converted = self.convert_test(img, 620, 500)
                 thumbnail = InMemoryUploadedFile(
