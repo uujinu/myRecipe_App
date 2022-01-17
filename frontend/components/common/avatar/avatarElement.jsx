@@ -36,7 +36,7 @@ export default function AvatarElement(props) {
   };
 
   const handleSettings = () => {
-    router.push("/settings");
+    router.push(`/manage/${pk}`);
   };
 
   const handleLogout = () => {
