@@ -51,7 +51,9 @@ export default function AvatarElement(props) {
         router.push("/");
       })
       .catch(() => {
-        alert("로그아웃에 실패했습니다.");
+        dispatch(userLogout());
+        dispatch(logout());
+        router.push("/");
       });
   };
 
