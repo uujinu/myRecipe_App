@@ -334,7 +334,7 @@ export default function ProfilePage({
 
   const handleSetting = () => {
     if (user.pk === id) {
-      router.push("/manage");
+      router.push(`/manage/${id}`);
     }
   };
 
