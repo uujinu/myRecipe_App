@@ -17,7 +17,6 @@ import { wrapper } from "../redux/store";
 function MyApp(props) {
   const { Component, pageProps } = props;
   const store = useStore((state) => state);
-
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode) {
@@ -34,13 +33,6 @@ function MyApp(props) {
       <StylesProvider injectFirst>
         <StyledThemeProvider theme={theme}>
           <MuiThemeProvider theme={theme}>
-            <Head>
-              <title>MyRecipe</title>
-              <meta
-                name="viewport"
-                content="initial-scale=1.0, width=device-width"
-              />
-            </Head>
             <CssBaseline />
             <PersistGate
               persistor={store.__persistor}
