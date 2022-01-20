@@ -45,7 +45,7 @@ const MessageBox = styled.div`
   text-align: center;
 `;
 
-function Resend(props) {
+export function Resend(props) {
   const { choice } = props;
   const initial = {
     email: "",
