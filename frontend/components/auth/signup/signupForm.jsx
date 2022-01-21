@@ -47,20 +47,21 @@ export default function SignUpForm() {
     dispatch(signupUser(formData))
       .then(unwrapResult)
       .then(() => {
+        resetForm();
         alert(
           `${values.email} 로 전송된 인증 이메일을 확인하여 가입을 완료하세요.`,
         );
       })
       .catch((err) => {
-        const res = err;
-        const temp = { ...errors };
-        if (e.hasOwnProperty("email")) temp.email = res.email;
-        if (e.hasOwnProperty("username"))
-          temp.username = "중복된 닉네임입니다.";
+        const temp = {};
+        resetForm();
+        // eslint-disable-next-line array-callback-return
+        Object.keys(err).map((val) => {
+          temp[val] = err[val];
+        });
         setErrors({ ...temp });
         alert("가입에 실패하였습니다.");
       });
-    resetForm();
   };
 
   // 이메일, 비밀번호 validation
@@ -135,7 +136,7 @@ export default function SignUpForm() {
           name="username"
           value={values.username}
           id="username"
-          label="닉네임"
+          label="아이디(ID)"
           inputProps={{ maxLength: 20 }}
           onChange={handleInputChange}
         />
