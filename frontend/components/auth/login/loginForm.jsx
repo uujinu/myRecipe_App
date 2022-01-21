@@ -116,8 +116,10 @@ export default function LoginForm() {
         dispatch(getUserInfo(res));
         router.replace("/");
       })
-      .catch(() => {
-        alert("로그인에 실패하였습니다.");
+      .catch((err) => {
+        if (err.non_field_errors !== "")
+          alert(`[로그인 실패] ${err.non_field_errors}`);
+        else alert("로그인에 실패했습니다.");
       });
     resetForm();
   };
