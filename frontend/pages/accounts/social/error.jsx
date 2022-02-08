@@ -5,7 +5,7 @@ import { useRouter } from "next/dist/client/router";
 export default function SocialError({ errorMsg }) {
   const router = useRouter();
   useEffect(() => {
-    alert(errorMsg);
+    alert(errorMsg !== "null" ? errorMsg : "오류가 발생했습니다.");
     router.push("/accounts/login");
   });
 
@@ -31,5 +31,5 @@ export const getServerSideProps = (ctx) => {
     errorMsg = "로그인에 실패하였습니다.";
   }
 
-  return { props: { errorMsg } };
+  return { props: { errorMsg: errorMsg || null } };
 };
