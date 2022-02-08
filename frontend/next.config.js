@@ -11,6 +11,10 @@ module.exports = {
           source: "/accounts/naver",
           destination: "http://localhost:8000/accounts/naver/",
         },
+        {
+          source: "/accounts/naver/reauthenticate",
+          destination: "http://localhost:8000/accounts/naver/reauthenticate/",
+        },
       ];
     }
   },
