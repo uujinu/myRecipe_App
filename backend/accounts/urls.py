@@ -6,7 +6,7 @@ from .social.views import *
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='user_login'),
     path(
-        'users/<int:pk>/', UserViewSet.as_view({'get': 'retrieve'}), name='user_profile'),
+        'users/<int:pk>/', UserViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='user_profile'),
     path('logout/', LogoutView.as_view(), name='rest_logout'),
     path('logout_all/', LogoutAllView.as_view(), name='logout_all'),
     path('password/reset/confirm/<slug:uidb64>/<slug:token>/',
@@ -28,4 +28,5 @@ urlpatterns = [
     path('following/<int:user_id>/', following, name='following'),
     path('info/', info,),
     path('social/', isSocialUser, ),
+    path('nickname-check/', nameCheck,),
 ]

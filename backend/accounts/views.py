@@ -1,3 +1,5 @@
+import os
+import requests
 from dj_rest_auth.jwt_auth import unset_jwt_cookies
 from django.http.response import HttpResponseRedirect
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
@@ -21,6 +23,7 @@ from rest_framework_simplejwt.utils import datetime_from_epoch
 from dj_rest_auth.views import PasswordResetConfirmView
 from rest_framework.decorators import api_view, permission_classes
 from posts.models import Post
+from allauth.socialaccount.models import SocialAccount, SocialToken
 
 
 class CustomLoginView(LoginView):
@@ -71,7 +74,7 @@ class ResendEmailView(generics.GenericAPIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [AllowAny, ]
+    permission_classes = [IsAuthenticated, ]
 
     def get_token(self, request):
         if request.COOKIES != {}:
@@ -80,6 +83,13 @@ class LogoutView(APIView):
         return ""
 
     def logout(self, request, token):
+        # 카카오 로그인인 경우
+        if request.user.platform == 'kakao':
+            url = f'https://kapi.kakao.com/v1/user/logout?target_id_type=user_id&target_id={request.user.social_id}'
+            api_key = os.environ.get('KAKAO_APP_ADMIN_KEY')
+            headers = {'Authorization': f'KakaoAK {api_key}'}
+            requests.post(url, headers=headers)
+
         django_logout(request)
         response = Response(
             {'success': 'Successfully logged out.'},
@@ -89,11 +99,10 @@ class LogoutView(APIView):
             t = RefreshToken(token)
             t.blacklist()
             unset_jwt_cookies(response)
-            return response
         except:
             response.data = {'error': 'Logout Failed.'}
             response.status_code = status.HTTP_400_BAD_REQUEST
-            return response
+        return response
 
     def get(self, request):
         res = self.get_token(request)
@@ -129,6 +138,54 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': serializer.data,
         }
         return Response(data)
+
+    def partial_update(self, request, *args, **kwargs):
+        res = super().partial_update(request, *args, **kwargs)
+        res.data = {'user': res.data}
+        return res
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.platform != '':
+            socialaccount = SocialAccount.objects.filter(user=request.user)
+            if socialaccount.exists():
+                # 네이버의 경우 토큰 유효성 검사 후 서비스연동 해제
+                if request.user.platform == 'naver':
+                    client_id = os.environ.get('NAVER_CLIENT_ID')
+                    client_secret = os.environ.get('NAVER_CLIENT_SECRET')
+                    url = 'https://openapi.naver.com/v1/nid/verify'
+                    socialtoken = SocialToken.objects.filter(
+                        account=socialaccount[0])
+                    if socialtoken.exists():
+                        # 토큰 유효성 검사
+                        headers = {
+                            'Authorization': f'Bearer {socialtoken[0].token}'}
+                        naver_res = requests.get(url, headers=headers).json()
+
+                        if (naver_res.get('resultcode') == '024'):  # 유효하지 않은 토큰
+                            return Response(naver_res)
+
+                        else:  # 유효한 토큰, 서비스 탈퇴 진행
+                            token = socialtoken[0].token
+                            requests.get(
+                                f'https://nid.naver.com/oauth2.0/token?client_id={client_id}&client_secret={client_secret}&access_token={token}&grant_type=delete&service_provider=NAVER')
+                else:  # 카카오 탈퇴
+                    url = 'https://kapi.kakao.com/v1/user/unlink'
+                    kakao_app_admin_key = os.environ.get('KAKAO_APP_ADMIN_KEY')
+                    headers = {
+                        'Authorization': f'KakaoAK {kakao_app_admin_key}'}
+                    social_id = socialaccount[0].uid
+                    requests.get(
+                        f'{url}?target_id_type=user_id&target_id={social_id}', headers=headers)
+
+        django_logout(request)
+
+        response = super().destroy(request, *args, **kwargs)
+        if request.COOKIES != {}:
+            token = request.COOKIES['refresh_token'] or ''
+            t = RefreshToken(token)
+            t.blacklist()
+            unset_jwt_cookies(response)
+        return response
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -240,3 +297,17 @@ def isSocialUser(request):
     return Response(data, status=status.HTTP_200_OK)
 
 
+@api_view(['get'])
+@permission_classes((AllowAny,))
+def nameCheck(request):
+    name = request.query_params.get('name')
+    if name is None:
+        return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+    res = {}
+    if User.objects.filter(nickname=name).exists():
+        res['code'] = 'fail'
+        res['msg'] = '이미 존재하는 닉네임입니다.'
+    else:
+        res['code'] = 'pass'
+        res['msg'] = '사용 가능한 닉네임입니다.'
+    return Response(res, status=status.HTTP_200_OK)
