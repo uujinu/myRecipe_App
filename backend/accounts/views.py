@@ -224,3 +224,19 @@ def info(request):
             id=post_id, bookmarks=request.user.id).exists()
 
     return Response({'response': res}, status=status.HTTP_200_OK)
+
+
+@api_view(['get'])
+@permission_classes((IsAuthenticatedOrReadOnly,))
+def isSocialUser(request):
+    user_id = request.query_params.get('user')
+    if user_id is None:
+        return Response('잘못된 접근입니다.', status=status.HTTP_400_BAD_REQUEST)
+    user = User.objects.get(id=user_id)
+    data = {'platform': '', 'social_id': ''}
+    if user.platform is not None:
+        data['platform'] = user.platform
+        data['social_id'] = user.social_id
+    return Response(data, status=status.HTTP_200_OK)
+
+

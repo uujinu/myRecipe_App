@@ -27,4 +27,5 @@ urlpatterns = [
     path('following/', following, name='following'),
     path('following/<int:user_id>/', following, name='following'),
     path('info/', info,),
+    path('social/', isSocialUser, ),
 ]
