@@ -21,6 +21,8 @@ class NaverSignUpView(APIView):
         redirectURI = os.environ.get('NAVER_REDIRECT_URI')
         state = request.COOKIES.get('csrftoken')
         url = f'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id={client_id}&redirect_uri={redirectURI}&state={state}'
+        if (request.path.split('/')[3] == 'reauthenticate'):
+            url = f'{url}&auth_type=reauthenticate'
         return redirect(url)
 
 
